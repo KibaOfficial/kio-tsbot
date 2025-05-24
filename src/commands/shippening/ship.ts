@@ -5,7 +5,7 @@
 
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import { Command } from "../../interfaces/types";
-import { formatPair, incrementPairCpunt, loadData, saveData } from "./data";
+import { incrementPairCount, loadData, saveData } from "./data";
 
 export const ship: Command = {
   data: new SlashCommandBuilder()
@@ -41,7 +41,7 @@ export const ship: Command = {
       return;
     }
 
-    incrementPairCpunt(data, pair[0].id, pair[1].id);
+    incrementPairCount(data, pair[0].id, pair[1].id);
     data.lastPair = [pair[0].id, pair[1].id];
 
     await saveData(data);
