@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import { Command } from "../interfaces/types";
+import { Command } from "../../interfaces/types";
 
 export const invite: Command = {
   data: new SlashCommandBuilder()
@@ -13,8 +13,8 @@ export const invite: Command = {
   async execute(interaction: CommandInteraction) {
     const clientId = process.env.BOT_ID;
     if (!clientId) {
-      console.log
-      interaction.reply("Bot ID is not set in the environment variables.");
+      console.log("[Invite] Bot ID is not set in the environment variables.");
+      await interaction.reply("[Invite] Bot ID is not set in the environment variables.");
       return;
     }
 
@@ -24,6 +24,6 @@ export const invite: Command = {
       content: `You can invite me using this link: [Invite Link](${inviteUrl})`,
       ephemeral: true,
     });
-    console.log(`Invite link sent: ${inviteUrl}\nRequested by: ${interaction.user.tag} (${interaction.user.id})`);
+    console.log(`[Invite] Invite link sent: ${inviteUrl}\nRequested by: ${interaction.user.tag} (${interaction.user.id})`);
   }
 }
