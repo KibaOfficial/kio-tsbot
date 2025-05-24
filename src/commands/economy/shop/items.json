@@ -5,7 +5,7 @@
     "items": [
       {
         "name": "Nickname Change",
-        "description": "Change your nickname in the server for 6 hours.",
+        "description": "Change your nickname in the server for 1 hour.",
         "price": 1000,
         "type": "nickname_change"
       },
@@ -17,7 +17,7 @@
       },
       {
         "name": "Ship Booster",
-        "description": "Increases your chance to be shipped for 24 hours.",
+        "description": "Increases your chance to be shipped for the next shipping.",
         "price": 1200,
         "type": "ship_boost"
       },

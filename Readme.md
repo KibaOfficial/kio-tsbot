@@ -150,6 +150,14 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.3 (25 May 2025)
+- Item `nickname_change` is now kinda available in the shop and should function properly
+- Improved error handling and logging for economy and shipping commands
+- Minor bug fixes and refactoring in command handling
+- Consistent use of persistent data for economy and shipping
+- Updated shop and inventory logic
+- Various internal improvements and code cleanup
+
 ### v0.1.2 (25 May 2025)
 - added `/item` command: Use items from your inventory
 - added `/shop` command: View available items in the shop and their descriptions
