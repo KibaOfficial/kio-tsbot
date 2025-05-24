@@ -150,6 +150,14 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.2 (24 May 2025)
+- added `/item` command: Use items from your inventory
+- added `/shop` command: View available items in the shop and their descriptions
+- added `/buy` command: Purchase items from the shop using fops 🦊
+- Improved inventory management and item usage logic
+- Refined persistent storage for inventory and shop data
+- Bug fixes and internal refactoring
+
 ### v0.1.1 (24 May 2025)
 
 - Added economy system with fops 🦊 as the currency

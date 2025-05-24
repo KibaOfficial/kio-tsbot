@@ -18,3 +18,16 @@ export const defaultUserData: UserEconomyData = {
   balance: 0,
   inventory: []
 }
+
+export interface Item {
+  name: string;
+  description: string;
+  price: number;
+  type: string;
+}
+
+export interface ShopData {
+  "shop-items": {
+    items: Item[];
+  };
+}
