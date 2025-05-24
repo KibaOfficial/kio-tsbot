@@ -150,7 +150,7 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
-### v0.1.2 (24 May 2025)
+### v0.1.2 (25 May 2025)
 - added `/item` command: Use items from your inventory
 - added `/shop` command: View available items in the shop and their descriptions
 - added `/buy` command: Purchase items from the shop using fops 🦊
