@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  kio-tsbot:
+    image: kio-tsbot-prod
+    container_name: kio-tsbot
+    restart: always
+    env_file:
+      - .env
