@@ -1,0 +1,24 @@
+{
+  "name": "kio-tsbot",
+  "version": "1.0.0",
+  "description": "A modular Discord bot written in TypeScript using discord.js",
+  "main": "dist/bot.js",
+  "scripts": {
+    "start": "node dist/bot.js",
+    "build": "tsc",
+    "dev": "ts-node-dev src/bot.ts"
+  },
+  "keywords": [],
+  "author": "KibaOfficial",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "discord.js": "^14.19.3",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  }
+}
