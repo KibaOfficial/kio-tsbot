@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import { Command } from "../types";
+import { Command } from "../interfaces/types";
 
 export const ping: Command = {
   data: new SlashCommandBuilder()

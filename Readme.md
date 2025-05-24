@@ -28,6 +28,9 @@
 - **Modular Architecture:**  
   Effortlessly add, remove, or modify commands and features; plugin-friendly structure.
 
+- **Shipping System:**  
+  Fun shipping commands with persistent stats, including `/ship`, `/last`, `/mystats`, and `/top` for user pairings and leaderboards.
+
 - **TypeScript First:**  
   Full type safety and modern development experience.
 
@@ -85,7 +88,7 @@ npm start
 
 ## Adding Commands
 
-- Place new command files in `src/commands/` following the examples (`ping.ts`, `invite.ts`).
+- Place new command files in `src/commands/` or subfolders (e.g. `src/commands/shippening/`).
 - Each command should export a `Command` object with a `data` property (built using `SlashCommandBuilder`) and an async `execute` function.
 
 #### Example Command
@@ -100,6 +103,23 @@ export const example: Command = {
     .setDescription('An example command'),
   async execute(interaction) {
     await interaction.reply('This is an example command!');
+  },
+};
+```
+
+#### Example Shipping Command
+
+```typescript
+import { SlashCommandBuilder } from 'discord.js';
+import { Command } from '../../interfaces/types';
+
+export const ship: Command = {
+  data: new SlashCommandBuilder()
+    .setName('ship')
+    .setDescription('Ships two random users in the server'),
+  async execute(interaction) {
+    // ...shipping logic...
+    await interaction.reply(`<@user1> ❤️ <@user2>`);
   },
 };
 ```
@@ -120,6 +140,17 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 ---
 
 ## Changelog
+
+### v0.0.2 (24 May 2025)
+
+- Added new shipping system with persistent stats and commands:
+  - `/ship`: randomly ships two users and saves the pair
+  - `/last`: shows the last shipped pair
+  - `/mystats`: shows how often a user has been shipped
+  - `/top`: displays the top 5 most shipped pairs
+- Added persistent storage for shipping data
+- Improved command loading to support subfolders
+- User mentions in shipping replies
 
 ### v0.0.1 (24 May 2025)
 
