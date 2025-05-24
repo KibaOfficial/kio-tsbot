@@ -2,12 +2,11 @@
 // 
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
-
 import { Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
 import * as dotenv from 'dotenv';
 import { Command } from './types';
 import { join } from 'path';
-import { readdirSync } from 'fs';
+import { loadCommands } from './utils/loadCommands';
 
 dotenv.config();
 
@@ -21,21 +20,16 @@ const client = new Client({
 });
 
 const commands = new Collection<string, Command>();
-const commandPath = join(__dirname, 'commands');
-const commandFiles = readdirSync(commandPath).filter(file => file.endsWith('.ts') || file.endsWith('.js'));
-
-for (const file of commandFiles) {
-  const filePath = join(commandPath, file);
-  const commandModule = require(filePath);
-  const command: Command = commandModule.default ?? Object.values(commandModule)[0];
-  if (command && command.data && command.data.name) {
-    commands.set(command.data.name, command);
-  }
-}
-
-const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN!);
 
 (async () => {
+  const commandPath = join(__dirname, 'commands');
+  const commandsArr = await loadCommands(commandPath);
+  for (const cmd of commandsArr) {
+    commands.set(cmd.data.name, cmd);
+  }
+
+  const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN!);
+
   try {
     console.log('Started refreshing application (/) commands.');
     const commandDatas = commands.map(cmd => cmd.data.toJSON());
@@ -54,6 +48,9 @@ const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN!);
   } catch (error) {
     console.error('Error refreshing application commands:', error);
   }
+
+  client.login(process.env.BOT_TOKEN)
+    .then(() => console.log('Bot logged in successfully.'));
 })();
 
 client.once(Events.ClientReady, () => {
@@ -62,9 +59,7 @@ client.once(Events.ClientReady, () => {
 
 // Command Handler
 client.on(Events.InteractionCreate, async interaction => {
-  
   if (!interaction.isChatInputCommand()) return;
-  
   const command = commands.get(interaction.commandName);
   if (!command) return;
 
@@ -77,9 +72,6 @@ client.on(Events.InteractionCreate, async interaction => {
       await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
     } else {
       await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-    }    
+    }
   }
 });
-
-client.login(process.env.BOT_TOKEN)
-  .then(() => console.log('Bot logged in successfully.'))
