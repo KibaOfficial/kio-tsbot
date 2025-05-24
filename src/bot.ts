@@ -31,7 +31,7 @@ const commands = new Collection<string, Command>();
   const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN!);
 
   try {
-    console.log('Started refreshing application (/) commands.');
+    console.log('[Main] Started refreshing application (/) commands.');
     const commandDatas = commands.map(cmd => cmd.data.toJSON());
     if (process.env.NODE_ENV === 'production') {
       await rest.put(
@@ -39,22 +39,22 @@ const commands = new Collection<string, Command>();
         { body: commandDatas },
       );
     } else {
-      console.log('Refreshing commands in guild mode.');
+      console.log('[Main] Refreshing commands in guild mode.');
       await rest.put(
         Routes.applicationGuildCommands(process.env.BOT_ID!, process.env.GUILD_ID!),
         { body: commandDatas },
       );
     }
   } catch (error) {
-    console.error('Error refreshing application commands:', error);
+    console.error('[Main] Error refreshing application commands:', error);
   }
 
   client.login(process.env.BOT_TOKEN)
-    .then(() => console.log('Bot logged in successfully.'));
+    .then(() => console.log('[Main] Bot logged in successfully.'));
 })();
 
 client.once(Events.ClientReady, () => {
-  console.log(`Logged in as ${client.user?.tag}!`);
+  console.log(`[Main] Logged in as ${client.user?.tag}! at ${new Date().toLocaleString()}`);
 });
 
 // Command Handler
@@ -64,7 +64,7 @@ client.on(Events.InteractionCreate, async interaction => {
   if (!command) return;
 
   try {
-    console.log(`Executing command: ${interaction.commandName} by ${interaction.user.tag}`);
+    console.log(`[Main] Executing command: ${interaction.commandName} by ${interaction.user.tag}`);
     await command.execute(interaction);
   } catch (error) {
     console.error(`Error executing command ${interaction.commandName}:`, error);
