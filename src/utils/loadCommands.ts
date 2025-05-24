@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { Command } from '../types';
+import { Command } from '../interfaces/types';
 import { join, extname } from 'path';
 import { promises as fs } from 'fs';
 

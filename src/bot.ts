@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 import { Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
 import * as dotenv from 'dotenv';
-import { Command } from './types';
+import { Command } from './interfaces/types';
 import { join } from 'path';
 import { loadCommands } from './utils/loadCommands';
 
