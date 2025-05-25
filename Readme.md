@@ -150,6 +150,23 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.7 (25 May 2025)
+- Added new Music system using [discord-player](https://github.com/Androz2091/discord-player) and [discord-player-youtubei](https://github.com/retrouser955/discord-player-youtubei) for YouTube support with following commands:
+  - `/join`: Join a voice channel
+  - `/leave`: Leave the voice channel
+  - `/play`: Play a song from YouTube or other sources
+- Planned commands for the music system:
+  - `/pause`: Pause the current song
+  - `/resume`: Resume the paused song
+  - `/skip`: Skip the current song
+  - `/stop`: Stop the current song, clears the queue and leaves the voice channel
+  - `/queue`: View the current song queue
+  - `/clearqueue`: Clear the current song queue
+  - `/nowplaying`: Show the currently playing song
+  - `/loop`: Toggle looping of the current song
+
+
+
 ### v0.1.6 (25 May 2025)
 - Enhanced command loading with category grouping in logs
 - Improved error handling and logging for commands

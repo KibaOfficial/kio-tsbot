@@ -30,6 +30,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessages, // Enables bot to receive message events
     GatewayIntentBits.MessageContent, // Enables bot to read message content
     GatewayIntentBits.GuildMembers, // Enables bot to access guild member info
+    GatewayIntentBits.GuildVoiceStates, // Enables bot to access voice state events
   ],
 });
 

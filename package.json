@@ -13,9 +13,10 @@
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
+    "discord-player": "^7.1.0",
+    "discord-player-youtubei": "^1.4.6",
     "discord.js": "^14.19.3",
-    "dotenv": "^16.5.0",
-    "glob": "^11.0.2"
+    "dotenv": "^16.5.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",
