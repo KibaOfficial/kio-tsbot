@@ -150,6 +150,15 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.4 (25 May 2025)
+- Added `/inventory` command: View your inventory of items and removed the inventory list from `/balance`
+- Added Moderation commands:
+  - `/kick`: Kick a user from the server
+  - `/ban`: Ban a user from the server
+  - `/timeout`: Timeout a user for a specified duration
+- Improved error handling and logging for commands overall
+- Refactored command handling to support new commands and improve consistency
+
 ### v0.1.3 (25 May 2025)
 - Item `nickname_change` is now kinda available in the shop and should function properly
 - Improved error handling and logging for economy and shipping commands

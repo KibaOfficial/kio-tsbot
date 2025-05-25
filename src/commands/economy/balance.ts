@@ -21,12 +21,8 @@ export const balance: Command = {
 
     await interaction.reply({
       content:
-        `Your balance is: **${userData.balance}** fops 🦊\n\n` +
-        `Inventory: ${
-          userData.inventory.length > 0
-            ? userData.inventory.join(", ")
-            : "Empty"
-        }`,
+        `Your balance is: **${userData.balance}** fops 🦊\n\n`,
+        flags: 64, // Ephemeral
     });
   },
 };
