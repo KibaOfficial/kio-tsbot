@@ -150,11 +150,14 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.5 (25 May 2025)
+- Added `/ban` command: Ban a user from the server
+- Added a CommandTemplate in `src/commands/CommandTemplate` for easier command creation
+
 ### v0.1.4 (25 May 2025)
 - Added `/inventory` command: View your inventory of items and removed the inventory list from `/balance`
 - Added Moderation commands:
   - `/kick`: Kick a user from the server
-  - `/ban`: Ban a user from the server
   - `/timeout`: Timeout a user for a specified duration
 - Improved error handling and logging for commands overall
 - Refactored command handling to support new commands and improve consistency

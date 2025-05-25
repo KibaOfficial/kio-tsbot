@@ -1,0 +1,21 @@
+// Copyright (c) 2025 KibaOfficial
+// 
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
+
+import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { Command } from "../../interfaces/types";
+
+export const commandName: Command = {
+  data: new SlashCommandBuilder()
+    .setName("commandName")
+    .setDescription("Description of the command"),
+
+  async execute(interaction: CommandInteraction) {
+    // Your command logic goes here
+    await interaction.reply({
+      content: "This is a placeholder response for the command.",
+      flags: 64, // Ephemeral
+    });
+  }
+}
