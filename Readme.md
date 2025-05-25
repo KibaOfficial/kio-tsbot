@@ -48,6 +48,18 @@
 - **Economy System:**  
   Earn, spend, and play with fops 🦊 (the in-bot currency) through commands like `/balance`, `/pay`, `/daily`, and `/playgame`.
 
+- **Moderation Commands:**
+  Kick, ban, and timeout users with commands like `/kick`, `/ban`, and `/timeout`.
+
+- **Music System:**
+  Play music in voice channels with commands like `/join`, `/leave`, `/play`, and more using [discord-player](https://github.com/Androz2091/discord-player) and [discord-player-youtubei](https://github.com/retrouser955/discord-player-youtubei) for YouTube support.
+
+- **Command Templates:**
+  Easily create new commands with a template structure in `src/commands/CommandTemplate`.
+
+- **Hot-reloading:**
+  Development mode with TypeScript and hot-reloading for fast iteration.
+
 ---
 
 ## Requirements
@@ -101,6 +113,11 @@ npm run build
 npm start
 ```
 
+Or deploy using Docker:
+```sh
+docker build -t kio-tsbot .
+docker run -d --name kio-tsbot -e BOT_ID=your_bot_id -e BOT_TOKEN=your_bot_token -e GUILD_ID=your_guild_id kio-tsbot
+```
 ---
 
 ## Adding Commands
