@@ -5,72 +5,72 @@
  https://opensource.org/licenses/MIT
 -->
 
-# Kio-TsBot
+# Kio-TsBot 🦊🤖
 
 **Kio-TsBot** is the modern, modular successor to [DiscordTSBot](https://github.com/KibaOfficial/DiscordTSBot) — a Discord bot written in TypeScript. Kio-TsBot is designed for simplicity, flexibility, and extensibility, making it easy to build, customize, and scale your own Discord bot.
 
 ---
 
-## Table of Contents
+## 📚 Table of Contents
 
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Adding Commands](#adding-commands)
-- [Hosting & Deployment](#hosting--deployment)
-- [Contributing](#contributing)
-- [License](#license)
-- [Changelog](#changelog)
+- [✨ Features](#features)
+- [📦 Requirements](#requirements)
+- [⚙️ Installation](#installation)
+- [🚀 Usage](#usage)
+- [🧩 Adding Commands](#adding-commands)
+- [🌐 Hosting & Deployment](#hosting--deployment)
+- [🤝 Contributing](#contributing)
+- [📄 License](#license)
+- [📝 Changelog](#changelog)
 
 ---
 
-## Features
+## ✨ Features
 
-- **Modular Architecture:**  
+- **🧱 Modular Architecture:**  
   Effortlessly add, remove, or modify commands and features; plugin-friendly structure.
 
-- **Shipping System:**  
+- **❤️ Shipping System:**  
   Fun shipping commands with persistent stats, including `/ship`, `/last`, `/mystats`, and `/top` for user pairings and leaderboards.
 
-- **TypeScript First:**  
+- **🧠 TypeScript First:**  
   Full type safety and modern development experience.
 
-- **Discord.js v14:**  
+- **📚 Discord.js v14:**  
   Built on top of the latest Discord.js library for robust Discord API support.
 
-- **Environment Configuration:**  
+- **🔐 Environment Configuration:**  
   Secure, environment-based configuration management via `.env` and [dotenv](https://www.npmjs.com/package/dotenv).
 
-- **Developer Experience:**  
+- **👨‍💻 Developer Experience:**  
   Clear structure, helpful error handling, and easy command creation.
 
-- **Economy System:**  
+- **💰 Economy System:**  
   Earn, spend, and play with fops 🦊 (the in-bot currency) through commands like `/balance`, `/pay`, `/daily`, and `/playgame`.
 
-- **Moderation Commands:**
+- **🛡️ Moderation Commands:**  
   Kick, ban, and timeout users with commands like `/kick`, `/ban`, and `/timeout`.
 
-- **Music System:**
-  Play music in voice channels with commands like `/join`, `/leave`, `/play`, and more using [discord-player](https://github.com/Androz2091/discord-player) and [discord-player-youtubei](https://github.com/retrouser955/discord-player-youtubei) for YouTube support.
+- **🎵 Music System:**  
+  Play music in voice channels with commands like `/join`, `/leave`, `/play`, and more using [discord-player](https://github.com/Androz2091/discord-player) and [discord-player-youtubei](https://github.com/retrouser955/discord-player-youtubei).
 
-- **Command Templates:**
+- **📂 Command Templates:**  
   Easily create new commands with a template structure in `src/commands/CommandTemplate`.
 
-- **Hot-reloading:**
+- **♻️ Hot-reloading:**  
   Development mode with TypeScript and hot-reloading for fast iteration.
 
 ---
 
-## Requirements
+## 📦 Requirements
 
-- **Node.js v18.0.0 or newer** (LTS recommended)
-- **Discord Bot Token** ([Get one here](https://discord.com/developers/applications))
+- **Node.js v18.0.0 or newer** (LTS recommended) ⚡
+- **Discord Bot Token** ([Get one here](https://discord.com/developers/applications) 🛠️)
 - **(Optional) Git** for easy cloning and updates
 
 ---
 
-## Installation
+## ⚙️ Installation
 
 1. **Clone the repository:**
    ```sh
@@ -96,16 +96,16 @@
 
 ---
 
-## Usage
+## 🚀 Usage
 
-### Development
+### 🛠 Development
 
 Run the bot in development mode (TypeScript, with hot-reloading):
 ```sh
 npm run dev
 ```
 
-### Production
+### 📦 Production
 
 Build and start the bot:
 ```sh
@@ -120,12 +120,12 @@ docker run -d --name kio-tsbot -e BOT_ID=your_bot_id -e BOT_TOKEN=your_bot_token
 ```
 ---
 
-## Adding Commands
+## 🧩 Adding Commands
 
 - Place new command files in `src/commands/` or subfolders (e.g. `src/commands/yourCommandCategory/`).
 - Each command should export a `Command` object with a `data` property (built using `SlashCommandBuilder`) and an async `execute` function.
 
-#### Example Command
+#### 📝 Example Command
 
 ```typescript
 import { SlashCommandBuilder } from 'discord.js';
@@ -143,101 +143,72 @@ export const example: Command = {
 
 ---
 
-## Hosting & Deployment
+## 🌐 Hosting & Deployment
 
 - Kio-TsBot can run on any Node.js-compatible environment:
-  - **Railway**, **Heroku**, **Render**, **Glitch**, **Repl.it**, **VPS**, or **Docker**.
+  - **Railway**, **Heroku**, **Render**, **Glitch**, **Repl.it**, **VPS**, or **Docker** 🐳
 - For Docker, you can use the included `Dockerfile` or create your own.
-- Make sure to keep your `.env` file secret and never commit your bot token to public repos!
+- 🔐 Keep your `.env` file secret and never commit your bot token to public repos!
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Contributions, bug reports, and suggestions are very welcome!  
-Feel free to open an [issue](https://github.com/KibaOfficial/kio-tsbot/issues) or [pull request](https://github.com/KibaOfficial/kio-tsbot/pulls).
+Feel free to open an [issue](https://github.com/KibaOfficial/kio-tsbot/issues) or [pull request](https://github.com/KibaOfficial/kio-tsbot/pulls). 🙌
 
 ---
 
-## License
+## 📄 License
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). 📜
 
 ---
 
-## Changelog
+## 📝 Changelog
 
 ### v0.1.7 (25 May 2025)
-- Added new Music system using [discord-player](https://github.com/Androz2091/discord-player) and [discord-player-youtubei](https://github.com/retrouser955/discord-player-youtubei) for YouTube support with following commands:
+- 🎵 Added new Music system using [discord-player](https://github.com/Androz2091/discord-player) and [discord-player-youtubei](https://github.com/retrouser955/discord-player-youtubei):
   - `/join`: Join a voice channel
   - `/leave`: Leave the voice channel
   - `/play`: Play a song from YouTube or other sources
-- Planned commands for the music system:
-  - `/pause`: Pause the current song
-  - `/resume`: Resume the paused song
-  - `/skip`: Skip the current song
-  - `/stop`: Stop the current song, clears the queue and leaves the voice channel
-  - `/queue`: View the current song queue
-  - `/clearqueue`: Clear the current song queue
-  - `/nowplaying`: Show the currently playing song
-  - `/loop`: Toggle looping of the current song
-
-
+- Planned:
+  - `/pause`, `/resume`, `/skip`, `/stop`, `/queue`, `/clearqueue`, `/nowplaying`, `/loop`
 
 ### v0.1.6 (25 May 2025)
-- Enhanced command loading with category grouping in logs
-- Improved error handling and logging for commands
+- 🗂 Enhanced command loading with category grouping in logs  
+- 🐞 Improved error handling and logging for commands
 
 ### v0.1.5 (25 May 2025)
-- Added `/ban` command: Ban a user from the server
-- Added a CommandTemplate in `src/commands/CommandTemplate` for easier command creation
+- 🔨 Added `/ban` command  
+- 🧱 Added CommandTemplate for easier command creation
 
 ### v0.1.4 (25 May 2025)
-- Added `/inventory` command: View your inventory of items and removed the inventory list from `/balance`
-- Added Moderation commands:
-  - `/kick`: Kick a user from the server
-  - `/timeout`: Timeout a user for a specified duration
-- Improved error handling and logging for commands overall
-- Refactored command handling to support new commands and improve consistency
+- 🎒 Added `/inventory`  
+- ⚔️ Added `/kick`, `/timeout`  
+- 🔧 Refactored and improved error handling
 
 ### v0.1.3 (25 May 2025)
-- Item `nickname_change` is now kinda available in the shop and should function properly
-- Improved error handling and logging for economy and shipping commands
-- Minor bug fixes and refactoring in command handling
-- Consistent use of persistent data for economy and shipping
-- Updated shop and inventory logic
-- Various internal improvements and code cleanup
+- 🛍️ Improved shop and inventory logic  
+- 🛠️ Consistent persistent data usage for economy/shipping  
+- 🧹 Code cleanup and fixes
 
 ### v0.1.2 (25 May 2025)
-- added `/item` command: Use items from your inventory
-- added `/shop` command: View available items in the shop and their descriptions
-- added `/buy` command: Purchase items from the shop using fops 🦊
-- Improved inventory management and item usage logic
-- Refined persistent storage for inventory and shop data
-- Bug fixes and internal refactoring
+- 🛒 `/item`, `/shop`, `/buy` commands added  
+- 📦 Improved storage and usage logic
 
 ### v0.1.1 (24 May 2025)
-
-- Added economy system with fops 🦊 as the currency
-- `/balance`, `/pay`, `/daily`, and `/playgames` commands for managing and playing with fops
-- Console logging for slot machine activity
-- Refactored codebase to consistently use fops 🦊 as the currency
+- 💰 Initial economy system: `/balance`, `/pay`, `/daily`, `/playgames`  
+- 🎰 Console logging for slot machine
 
 ### v0.0.2 (24 May 2025)
-
-- Added new shipping system with persistent stats and commands:
-  - `/ship`: randomly ships two users and saves the pair
-  - `/last`: shows the last shipped pair
-  - `/mystats`: shows how often a user has been shipped
-  - `/top`: displays the top 5 most shipped pairs
-- Added persistent storage for shipping data
-- Improved command loading to support subfolders
-- User mentions in shipping replies
+- ❤️ Shipping system with persistent data  
+- 🧪 Subfolder command loading  
+- 🧑‍🤝‍🧑 User mentions
 
 ### v0.0.1 (24 May 2025)
+- 🧱 Initial release with basic commands  
+- ⚙️ Modular, plugin-ready design  
+- 🧪 TypeScript support + dotenv
 
-- Initial release
-- Basic command structure with `ping` and `invite`
-- Modular, plugin-ready design
-- TypeScript support with strong typing
-- Environment variable management via dotenv
+---
