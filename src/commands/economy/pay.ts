@@ -41,7 +41,7 @@ export const pay: Command = {
         content: `✅ Successfully sent **${amount}** fops 🦊 to <@${toUserId}>!`,
       });
     } catch (error) {
-      console.error("Error during money transfer:", error);
+      console.error("[ECO] Error during money transfer:", error);
       await interaction.reply({
         content: `❌ An error occurred while trying to send fops: ${error instanceof Error ? error.message : String(error)}\n\nPlease try again later.`,
         flags: MessageFlags.Ephemeral,

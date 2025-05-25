@@ -149,7 +149,7 @@ export const timeout: Command = {
         flags: 64, // ephemeral
       });
     } catch (error) {
-      console.error(`Error timing out user ${userToTimeout.tag}:`, error);
+      console.error(`[MOD] Error timing out user ${userToTimeout.tag}:`, error);
       await interaction.reply({
         content: `There was an error while trying to timeout ${userToTimeout.tag}.\nReason: ${error}`,
         flags: 64, // ephemeral

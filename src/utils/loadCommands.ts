@@ -23,7 +23,7 @@ export async function loadCommands(dir: string): Promise<Command[]> {
           commands.push(cmd);
         }
       } catch (err) {
-        console.error(`Error loading Command "${fullPath}":`, err);
+        console.error(`[CommandLoader] Error loading Command "${fullPath}":`, err);
       }
     }
   }

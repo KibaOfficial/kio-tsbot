@@ -65,11 +65,11 @@ export async function useNicknameChange(
       try {
         await interaction.guild?.members.me?.setNickname(null);
       } catch (error) {
-        console.error("Failed to reset nickname:", error);
+        console.error("[Item] Failed to reset nickname:", error);
       }
     }, 60 * 60 * 1000); // 1 hour in milliseconds
   } catch (error) {
-    console.error("Error changing nickname:", error);
+    console.error("[Item] Error changing nickname:", error);
     try {
       await interaction.followUp({
         content: "❌ You didn't respond in time or an error occurred.",

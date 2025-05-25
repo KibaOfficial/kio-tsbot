@@ -118,7 +118,7 @@ client.on(Events.InteractionCreate, async interaction => {
     console.log(`[Main] Successfully executed command: ${interaction.commandName} for ${interaction.user.tag}`);
   } catch (error) {
     // Log and reply to errors during command execution
-    console.error(`Error executing command ${interaction.commandName} by ${interaction.user.tag}:`, error);
+    console.error(`[Main] Error executing command ${interaction.commandName} by ${interaction.user.tag}:`, error);
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
     } else {
