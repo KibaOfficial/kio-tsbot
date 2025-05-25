@@ -8,6 +8,7 @@ import * as dotenv from 'dotenv';
 import { Command } from './interfaces/types';
 import { join } from 'path';
 import { loadCommands } from './utils/loadCommands';
+import { group } from 'console';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -50,11 +51,17 @@ const commands = new Collection<string, Command>();
     commands.set(cmd.data.name, cmd);
   }
 
-  // Log the number of commands loaded
-  console.log(`[Main] Loaded ${commands.size} commands.`);
-
-  // Print the command names for debugging
-  console.log('[Main] Commands loaded:', commands.map(cmd => cmd.data.name).join(', '));
+  // Log the number of commands loaded by category (first directory after /commands)
+  const grouped: Record<string, string[]> = {};
+  for (const cmd of commandsArr) {
+    const mainCategory = cmd.category.split('/')[0] || 'unknown';
+    if (!grouped[mainCategory]) grouped[mainCategory] = [];
+    grouped[mainCategory].push(cmd.data.name);
+  }
+  console.log(`[Main] Loaded ${commandsArr.length} commands in ${Object.keys(grouped).length} main categories:`);
+  for ( const [category, cmds] of Object.entries(grouped)) {
+    console.log(`  - ${category}: ${cmds.length} commands (${cmds.join(', ')})`);
+  }
 
   // Register commands with Discord's API for slash command support
   const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN!);

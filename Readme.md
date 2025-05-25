@@ -150,6 +150,10 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.6 (25 May 2025)
+- Enhanced command loading with category grouping in logs
+- Improved error handling and logging for commands
+
 ### v0.1.5 (25 May 2025)
 - Added `/ban` command: Ban a user from the server
 - Added a CommandTemplate in `src/commands/CommandTemplate` for easier command creation
