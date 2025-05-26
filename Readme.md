@@ -11,21 +11,21 @@
 
 ---
 
-## 📚 Table of Contents
+## Table of Contents
 
 - [✨ Features](#features)
 - [📦 Requirements](#requirements)
 - [⚙️ Installation](#installation)
 - [🚀 Usage](#usage)
 - [🧩 Adding Commands](#adding-commands)
-- [🌐 Hosting & Deployment](#hosting--deployment)
+- [🌐 Hosting & Deployment](#hosting-deployment)
 - [🤝 Contributing](#contributing)
 - [📄 License](#license)
 - [📝 Changelog](#changelog)
 
 ---
 
-## ✨ Features
+## Features
 
 - **🧱 Modular Architecture:**  
   Effortlessly add, remove, or modify commands and features; plugin-friendly structure.
@@ -62,7 +62,7 @@
 
 ---
 
-## 📦 Requirements
+## Requirements
 
 - **Node.js v18.0.0 or newer** (LTS recommended) ⚡
 - **Discord Bot Token** ([Get one here](https://discord.com/developers/applications) 🛠️)
@@ -70,7 +70,7 @@
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 1. **Clone the repository:**
    ```sh
@@ -96,7 +96,7 @@
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ### 🛠 Development
 
@@ -120,7 +120,7 @@ docker run -d --name kio-tsbot -e BOT_ID=your_bot_id -e BOT_TOKEN=your_bot_token
 ```
 ---
 
-## 🧩 Adding Commands
+## Adding Commands
 
 - Place new command files in `src/commands/` or subfolders (e.g. `src/commands/yourCommandCategory/`).
 - Each command should export a `Command` object with a `data` property (built using `SlashCommandBuilder`) and an async `execute` function.
@@ -143,7 +143,7 @@ export const example: Command = {
 
 ---
 
-## 🌐 Hosting & Deployment
+## Hosting & Deployment
 
 - Kio-TsBot can run on any Node.js-compatible environment:
   - **Railway**, **Heroku**, **Render**, **Glitch**, **Repl.it**, **VPS**, or **Docker** 🐳
@@ -152,20 +152,20 @@ export const example: Command = {
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, bug reports, and suggestions are very welcome!  
 Feel free to open an [issue](https://github.com/KibaOfficial/kio-tsbot/issues) or [pull request](https://github.com/KibaOfficial/kio-tsbot/pulls). 🙌
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). 📜
 
 ---
 
-## 📝 Changelog
+## Changelog
 
 ### v0.1.7 (25 May 2025)
 - 🎵 Added new Music system using [discord-player](https://github.com/Androz2091/discord-player) and [discord-player-youtubei](https://github.com/retrouser955/discord-player-youtubei):
