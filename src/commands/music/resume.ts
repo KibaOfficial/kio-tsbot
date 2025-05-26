@@ -47,7 +47,7 @@ export const resume: Command = {
     const player = await getPlayer(interaction.client);
     const queue = player.nodes.get(interaction.guild.id);
 
-    if (!queue || !queue.node.isPlaying()) {
+    if (!queue || !queue.currentTrack) {
       await interaction.reply({
         content: "There's no music playing right now.",
         flags: 64
@@ -62,6 +62,7 @@ export const resume: Command = {
       });
       return;
     }
+
 
     queue.node.setPaused(false);
     await interaction.reply({

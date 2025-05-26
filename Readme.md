@@ -167,6 +167,11 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.11 (26 May 2025)
+- ➕ Added: `/clearqueue` command to clear the current music queue (except the currently playing song).
+- ➕ Added: `/loop` command to toggle loop mode for the current song or queue.
+- 🐛 Fixed: `/pause` and `/resume` commands now properly check for current track and queue state.
+
 ### v0.1.10 (26 May 2025)
 - 🐛 Fixed: `/queue` command now correctly shows the currently playing song as "Now Playing" instead of the next song in the list.
 - ➕ Improved: `/skip` command now displays the next song after skipping, or a message if the queue is empty.
