@@ -167,6 +167,11 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.10 (26 May 2025)
+- 🐛 Fixed: `/queue` command now correctly shows the currently playing song as "Now Playing" instead of the next song in the list.
+- ➕ Improved: `/skip` command now displays the next song after skipping, or a message if the queue is empty.
+- ➕ Added: `/nowplaying` command to show details of the currently playing song.
+
 ### v0.1.9 (26 May 2025)
 - 🎵 Added new commands for the music system:
   - `/stop`: Stop the current song

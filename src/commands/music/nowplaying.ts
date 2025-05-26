@@ -3,16 +3,14 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction, EmbedBuilder, GuildMember } from "discord.js";
+import { SlashCommandBuilder, CommandInteraction, EmbedBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
 
-// queue command for the music system which should reply with the current list of songs with an embed
-
-export const queue: Command = {
+export const nowplaying: Command = {
   data: new SlashCommandBuilder()
-    .setName("queue")
-    .setDescription("Shows the current queue of songs"),
+    .setName("nowplaying")
+    .setDescription("Shows the currently playing song"),
 
   async execute(interaction: CommandInteraction) {
     // check if the command was sent in a guild
@@ -25,7 +23,7 @@ export const queue: Command = {
     }
 
     // check if the user is in a voice channel
-    const member = await interaction.guild.members.fetch(interaction.user.id) as GuildMember;
+    const member = await interaction.guild.members.fetch(interaction.user.id);
     if (!member || !member.voice.channel) {
       await interaction.reply({
         content: "You need to be in a voice channel to use this command.",
@@ -56,42 +54,30 @@ export const queue: Command = {
     // get the player for the guild
     const player = await getPlayer(interaction.client);
     const queue = player.nodes.get(interaction.guild.id);
-
     if (!queue || !queue.node.isPlaying() || !queue.currentTrack) {
       await interaction.reply({
-        content: "There is no music currently playing in this server.",
+        content: "There is no song currently playing.",
         flags: 64,
       });
       return;
     }
 
+    // create an embed with the current song information
     const currentTrack = queue.currentTrack;
-
-
-    const nextTracks = typeof queue.tracks.toArray === "function" ? queue.tracks.toArray() : [];
-
-    const maxDisplay = 10;
-    const formattedTracks = [
-      `🎶 **Now Playing:** [${currentTrack.title}](${currentTrack.url}) - \`${currentTrack.author}\` [${currentTrack.duration}]`,
-      ...nextTracks.slice(0, maxDisplay - 1).map((track, i) =>
-        `**${i + 1}.** [${track.title}](${track.url}) - \`${track.author}\` [${track.duration}]`
-      ),
-    ];
-
-    if (nextTracks.length === 0) {
-      formattedTracks.push("_No more songs in the queue._");
-    } else if (nextTracks.length > maxDisplay - 1) {
-      formattedTracks.push(`...and ${nextTracks.length - (maxDisplay - 1)} more tracks in the queue.`);
-    }
-
     const embed = new EmbedBuilder()
-      .setColor("#1DB954")
-      .setTitle("🎵 Music Queue")
+      .setColor("#0099ff")
+      .setTitle("Now Playing")
+      .setDescription(
+        `**[${currentTrack.title}](${currentTrack.url})**\n` +
+        `**Artist:** ${currentTrack.author}\n` +
+        `**Duration:** ${currentTrack.duration}`
+      )
       .setThumbnail(currentTrack.thumbnail ?? "https://cdn-icons-png.flaticon.com/512/727/727245.png")
-      .setDescription(formattedTracks.join("\n"))
-      .setFooter({ text: `Total songs in queue: ${1 + nextTracks.length}` })
-      .setTimestamp();
+      .setFooter({
+        text: `Requested by ${currentTrack.requestedBy ? currentTrack.requestedBy.username : "Unknown"}`,
+        iconURL: currentTrack.requestedBy?.displayAvatarURL?.() ?? undefined
+      });
 
-    await interaction.reply({ embeds: [embed], flags: 64 });
-  },
+    await interaction.reply({ embeds: [embed] });
+  }
 };

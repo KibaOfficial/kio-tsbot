@@ -78,14 +78,19 @@ export const skip: Command = {
     const skipped = queue.node.skip();
 
     if (skipped) {
-      await interaction.reply({
-        content: "✅ Skipped the current song.",
-      });
-    } else {
-      await interaction.reply({
-        content: "❌ Failed to skip the current song.",
-        flags: 64,
-      });
+      let content = "✅ Skipped the current song.";
+
+      // Gib dem Player 100-200ms Zeit, den neuen Track zu laden
+      await new Promise(res => setTimeout(res, 200));
+      const currentTrack = queue.currentTrack;
+
+      if (currentTrack) {
+        content += `\n🎶 **Now playing:** [${currentTrack.title}](${currentTrack.url}) - \`${currentTrack.author}\` [${currentTrack.duration}]`;
+      } else {
+        content += `\nEs gibt keinen weiteren Song in der Queue.`;
+      }
+
+      await interaction.reply({ content });
     }
   }
 }
