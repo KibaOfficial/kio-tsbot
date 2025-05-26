@@ -167,6 +167,12 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.9 (26 May 2025)
+- 🎵 Added new commands for the music system:
+  - `/stop`: Stop the current song
+  - `/skip`: Skip the current song
+  - `/queue`: View the current song queue
+
 ### v0.1.8 (26 May 2025)
 - 🎵 Added `/pause` and `/resume` commands for the music system
 
