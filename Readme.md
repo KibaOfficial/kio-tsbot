@@ -167,6 +167,9 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.8 (26 May 2025)
+- 🎵 Added `/pause` and `/resume` commands for the music system
+
 ### v0.1.7 (25 May 2025)
 - 🎵 Added new Music system using [discord-player](https://github.com/Androz2091/discord-player) and [discord-player-youtubei](https://github.com/retrouser955/discord-player-youtubei):
   - `/join`: Join a voice channel
