@@ -12,7 +12,7 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const DAILY_AMOUNT = parseInt(process.env.DAILY_AMOUNT ?? "100");
+const DAILY_AMOUNT = parseInt(process.env.DAILY_REWARD ?? "100");
 
 export const daily = {
   data: new SlashCommandBuilder()
