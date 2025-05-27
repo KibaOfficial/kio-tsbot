@@ -6,6 +6,7 @@
 import { SlashCommandBuilder, CommandInteraction, GuildMember } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
+import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
 
 // pause command for the music system
 
@@ -15,41 +16,18 @@ export const pause: Command = {
     .setDescription("Pause the current song."),
 
   async execute(interaction: CommandInteraction) {
-    // check if the command is used in a guild
-    if (!interaction.guild) {
-      await interaction.reply({
-        content: "This command can only be used in a server.",
-        flags: 64 // Ephemeral
-      });
-      return;
-    }
+    // Check: In Guild?
+    if (!(await ensureInGuild(interaction))) return;
 
-    const member = (await interaction.guild.members.fetch(
-      interaction.user.id) as GuildMember);
+    // Check: User in VoiceChannel?
+    const voiceChannel = await ensureInVoice(interaction);
+    if (!voiceChannel) return;
 
-    // check if the user is in a voice channel
-    const voiceChannel = member.voice.channel;
-    if (!voiceChannel) {
-      await interaction.reply({
-        content: "You need to be in a voice channel to use this command.",
-        flags: 64 // Ephemeral
-      });
-      return;
-    }
+    // Check: Bot in same Channel or not connected?
+    if (!(await ensureBotInSameVoice(interaction, voiceChannel))) return;
 
-    // check if the bot is in the same voice channel
-    const botVoiceChannel = interaction.guild.members.me?.voice.channel;
-    if (botVoiceChannel && botVoiceChannel.id !== voiceChannel.id) {
-      await interaction.reply({
-        content: `I am already in a different voice channel (${botVoiceChannel.name}). Please move me to your voice channel.`,
-        flags: 64 // Ephemeral
-      });
-      return;
-    }
-
-    // get the player for the guild
     const player = await getPlayer(interaction.client);
-    const queue = player.nodes.get(interaction.guild.id);
+    const queue = player.nodes.get(interaction.guild!.id);
 
     if (!queue || !queue.currentTrack) {
       await interaction.reply({

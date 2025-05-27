@@ -6,6 +6,7 @@
 import { SlashCommandBuilder, CommandInteraction, GuildMember, EmbedBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer, queueLimit } from "../../music/player";
+import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
 
 export const play: Command = {
   data: new SlashCommandBuilder()
@@ -19,51 +20,35 @@ export const play: Command = {
     ),
 
   async execute(interaction: CommandInteraction) {
-    if (!interaction.guild) {
-      await interaction.reply({
-        content: "This command can only be used in a server.",
-        flags: 64,
-      });
-      return;
-    }
+    // Check: In Guild?
+    if (!(await ensureInGuild(interaction))) return;
 
-    const member = (await interaction.guild.members.fetch(
-      interaction.user.id
-    )) as GuildMember;
-    if (!member) {
-      await interaction.reply({
-        content: "You need to be a member of this server to use this command.",
-        flags: 64,
-      });
-      return;
-    }
-    const voiceChannel = member.voice.channel;
-    if (!voiceChannel) {
-      await interaction.reply({
-        content: "You need to be in a voice channel to use this command.",
-        flags: 64,
-      });
-      return;
-    }
+    // Check: User in VoiceChannel?
+    const voiceChannel = await ensureInVoice(interaction);
+    if (!voiceChannel) return;
 
-    const botVoiceChannel = interaction.guild.members.me?.voice.channel;
-    if (botVoiceChannel && botVoiceChannel.id !== voiceChannel.id) {
-      await interaction.reply({
-        content: `I am already in a different voice channel (${botVoiceChannel.name}). Please move me to your voice channel.`,
-        flags: 64,
-      });
-      return;
-    }
-    // Wenn Bot noch nicht connected oder im gleichen Channel: weitermachen!
+    // Check: Bot in same Channel or not connected?
+    if (!(await ensureBotInSameVoice(interaction, voiceChannel))) return;
 
-    const query = interaction.options.get("song")?.value as string;
+    const query = interaction.options.get("song", true).value as string;
     const player = await getPlayer(interaction.client);
+    if (!player) {
+      await interaction.reply({
+        content: "Music player is not initialized. Please try again later.",
+        flags: 64,
+      });
+      return;
+    }
 
-    const queue = player.nodes.create(interaction.guild, {
+    const queue = player.nodes.create(interaction.guild!, {
       metadata: {
         channel: interaction.channel,
-        interaction: interaction,
+        voiceChannel: voiceChannel,
       },
+      volume: 100,
+      leaveOnEmpty: false,
+      leaveOnEnd: false,
+      leaveOnStop: false,
       selfDeaf: true,
     });
 
@@ -131,7 +116,7 @@ export const play: Command = {
       }
 
       await interaction.reply({ embeds: [embed] });
-      console.log(`[Music] ${interaction.user.tag} added ${result.playlist ? `${tracksToAdd.length} songs from playlist` : `1 song`} to the queue in ${interaction.guild.name}`);
+      console.log(`[Music] ${interaction.user.tag} added ${result.playlist ? `${tracksToAdd.length} songs from playlist` : `1 song`} to the queue in ${interaction.guild!.name}`);
     } catch (error) {
       console.error(`[Music] Error playing song:`, error);
       await interaction.reply({

@@ -6,6 +6,7 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
+import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
 
 // skip command for the music system
 
@@ -15,47 +16,19 @@ export const skip: Command = {
     .setDescription("Skips the current song"),
 
   async execute(interaction: CommandInteraction) {
-    // check if the command was sent in a guild
-    if (!interaction.guild) {
-      await interaction.reply({
-        content: "This command can only be used in a server.",
-        flags: 64,
-      });
-      return;
-    }
+    // Is it a guild command?
+    if (!(await ensureInGuild(interaction))) return;
 
-    // check if the user is in a voice channel
-    const member = await interaction.guild.members.fetch(interaction.user.id);
-    if (!member || !member.voice.channel) {
-      await interaction.reply({
-        content: "You need to be in a voice channel to use this command.",
-        flags: 64,
-      });
-      return;
-    }
+    // Is the user in a voice channel? (and return the voice channel)
+    const voiceChannel = await ensureInVoice(interaction);
+    if (!voiceChannel) return;
 
-    // check if the bot is in a voice channel
-    const botVoiceChannel = interaction.guild.members.me?.voice.channel;
-    if (!botVoiceChannel) {
-      await interaction.reply({
-        content: "I am not in a voice channel.",
-        flags: 64,
-      });
-      return;
-    }
-
-    // check if the user is in the same voice channel as the bot
-    if (member.voice.channel.id !== botVoiceChannel.id) {
-      await interaction.reply({
-        content: "You need to be in the same voice channel as me to use this command.",
-        flags: 64,
-      });
-      return;
-    }
+    // Is the bot in the same voice channel or not even connected to a voice channel?
+    if (!(await ensureBotInSameVoice(interaction, voiceChannel))) return;
 
     // get the player for the guild
     const player = await getPlayer(interaction.client);
-    const queue = player.nodes.get(interaction.guild.id);
+    const queue = player.nodes.get(interaction.guild!.id);
 
     if (!queue) {
       await interaction.reply({
@@ -80,7 +53,7 @@ export const skip: Command = {
     if (skipped) {
       let content = "✅ Skipped the current song.";
 
-      // Gib dem Player 100-200ms Zeit, den neuen Track zu laden
+      // wait for the next track to be ready
       await new Promise(res => setTimeout(res, 200));
       const currentTrack = queue.currentTrack;
 
@@ -91,6 +64,12 @@ export const skip: Command = {
       }
 
       await interaction.reply({ content });
+    } else {
+      // if skip should fail (which is unlikely)
+      await interaction.reply({
+        content: "❌ Unable to skip the current song. Please try again later.",
+        flags: 64,
+      });
     }
   }
 }

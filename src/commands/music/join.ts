@@ -6,38 +6,21 @@
 import { SlashCommandBuilder, CommandInteraction, GuildMember } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
+import { ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
 
 export const join: Command = {
   data: new SlashCommandBuilder()
     .setName("join")
     .setDescription("Join your voice channel"),
   async execute(interaction: CommandInteraction) {
-    if (!interaction.guild) {
-      await interaction.reply({
-        content: "This command can only be used in a server.",
-        flags: 64,
-      });
-      return;
-    }
+    // Check: In Guild?
+    if (!(await ensureInGuild(interaction))) return;
 
-    const member = await interaction.guild.members.fetch(interaction.user.id) as GuildMember;
-    if (!member) {
-      await interaction.reply({
-        content: "You need to be a member of this server to use this command.",
-        flags: 64,
-      });
-      return;
-    }
-    const voiceChannel = member.voice.channel;
-    if (!voiceChannel) {
-      await interaction.reply({
-        content: "You need to be in a voice channel to use this command.",
-        flags: 64,
-      });
-      return;
-    }
+    // Check: User in VoiceChannel?
+    const voiceChannel = await ensureInVoice(interaction);
+    if (!voiceChannel) return;
 
-    const botVoiceChannel = interaction.guild.members.me?.voice.channel;
+    const botVoiceChannel = interaction.guild!.members.me?.voice.channel;
     if (botVoiceChannel) {
       if (botVoiceChannel.id === voiceChannel.id) {
         await interaction.reply({
@@ -56,7 +39,7 @@ export const join: Command = {
 
     const player = await getPlayer(interaction.client);
 
-    const queue = player.nodes.create(interaction.guild, {
+    const queue = player.nodes.create(interaction.guild!, {
       metadata: {
         channel: interaction.channel,
         interaction: interaction,

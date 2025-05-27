@@ -167,6 +167,12 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.13 (27 May 2025)
+- ♻️ Refactored all music commands to use shared voice channel utility functions (`voiceUtils.ts`) for cleaner and more maintainable code.
+- 🧹 Unified error handling and user feedback for all music commands.
+- 🐛 Improved consistency and reliability of `/play`, `/pause`, `/resume`, `/skip`, `/stop`, `/queue`, `/clearqueue`, `/nowplaying`, `/loop`, `/join`, and `/leave`.
+- 📦 Updated dependencies and bumped version to 0.1.13.
+
 ### v0.1.12 (27 May 2025)
 - ➕ Added a [Privacy Policy](https://github.com/KibaOfficial/kio-tsbot/blob/main/PRIVACY_POLICY.md) to comply with Discord's requirements.
 - ➕ Added a [Terms of Service](https://github.com/KibaOfficial/kio-tsbot/blob/main/TERMS_OF_USE.md) to outline user rights and responsibilities.
