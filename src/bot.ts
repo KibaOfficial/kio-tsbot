@@ -52,6 +52,9 @@ const commands = new Collection<string, Command>();
     commands.set(cmd.data.name, cmd);
   }
 
+  // Attach commands collection to client for access in commands like /help
+  (client as any).commands = commands;
+
   // Log the number of commands loaded by category (first directory after /commands)
   const grouped: Record<string, string[]> = {};
   for (const cmd of commandsArr) {

@@ -1,6 +1,6 @@
 {
   "name": "kio-tsbot",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "A modular Discord bot written in TypeScript using discord.js",
   "main": "dist/bot.js",
   "scripts": {

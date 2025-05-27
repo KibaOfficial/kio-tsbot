@@ -167,6 +167,11 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.12 (27 May 2025)
+- ❓ Added `/help` command to list all available commands with descriptions.
+- Improved `bot.ts` where the command list get now attached to the bot client for easier access to all commands.
+- 🐳 Modified `dockerfile` to include an installation of `ffmpeg` for the `Discord-Player` library.
+
 ### v0.1.11 (26 May 2025)
 - ➕ Added: `/clearqueue` command to clear the current music queue (except the currently playing song).
 - ➕ Added: `/loop` command to toggle loop mode for the current song or queue.
