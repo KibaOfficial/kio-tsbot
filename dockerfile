@@ -13,6 +13,10 @@ COPY package*.json ./
 # install dependencies
 RUN npm install
 
+# install ffmpeg for discord-player
+RUN apt-get update && apt-get install -y ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
+
 # copy the rest of the application code
 COPY . .
 
