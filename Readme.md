@@ -168,6 +168,10 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 ## Changelog
 
 ### v0.1.12 (27 May 2025)
+- ➕ Added a [Privacy Policy](https://github.com/KibaOfficial/kio-tsbot/blob/main/PRIVACY_POLICY.md) to comply with Discord's requirements.
+- ➕ Added a [Terms of Service](https://github.com/KibaOfficial/kio-tsbot/blob/main/TERMS_OF_USE.md) to outline user rights and responsibilities.
+
+### v0.1.12 (27 May 2025)
 - ❓ Added `/help` command to list all available commands with descriptions.
 - Improved `bot.ts` where the command list get now attached to the bot client for easier access to all commands.
 - 🐳 Modified `dockerfile` to include an installation of `ffmpeg` for the `Discord-Player` library.
