@@ -83,7 +83,7 @@ export const item: Command = {
 
     switch (itemObj.itemType) {
       case "nickname_change":
-        await useNicknameChange(interaction, userId, userData, allUserData);
+        await useNicknameChange(interaction);
         break;
       case "multiplier":
         await interaction.reply({
