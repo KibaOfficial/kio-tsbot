@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { CommandInteraction, MessageFlags } from "discord.js";
+import { ChatInputCommandInteraction } from "discord.js";
 import { addMoney, removeMoney } from "../data";
 
 const slotEmojis = [
@@ -15,12 +15,28 @@ const slotEmojis = [
   { emoji: "7️⃣", multiplier: 5 },
 ]
 
+/**
+ * Returns a random emoji from the slot machine emojis.
+ * The emojis are predefined with their respective multipliers.
+ * This function is used to simulate a slot machine spin.
+ * @returns {string} A random emoji from the slot machine emojis.
+ */
 function getRandomEmoji() {
   const index = Math.floor(Math.random() * slotEmojis.length);
   return slotEmojis[index].emoji;
 }
 
-export async function playSlots(interaction: CommandInteraction, bet: number) {
+/**
+ * Plays the slot machine game.
+ * It removes the bet amount from the user's balance,
+ * spins the slot machine, and determines if the user wins or loses.
+ * If the user wins, it adds the reward to their balance.
+ * @param {ChatInputCommandInteraction} interaction - The interaction object from Discord.
+ * @param {number} bet - The amount of money the user is betting.
+ * @throws {Error} If the user does not have enough money to play.
+ * @returns {Promise<void>} A promise that resolves when the game is played.
+ */
+export async function playSlots(interaction: ChatInputCommandInteraction, bet: number) {
   const userId = interaction.user.id;
 
   try {
@@ -29,7 +45,7 @@ export async function playSlots(interaction: CommandInteraction, bet: number) {
     console.error(`[SLOTS] Error removing money for user ${userId}:`, error);
     await interaction.reply({
       content: `❌ You don't have enough fops 🦊 to play! You need at least ${bet} fops 🦊.`,
-      flags: MessageFlags.Ephemeral,
+      flags: 64 // Ephemeral
     });
     return;
   }

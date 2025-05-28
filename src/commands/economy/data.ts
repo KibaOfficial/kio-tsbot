@@ -5,7 +5,7 @@
 
 import { promises as fs } from 'fs';
 import { join } from "path";
-import { EconomyData, defaultUserData } from "../../interfaces/econemyData";
+import { EconomyData, UserEconomyData, defaultUserData } from "../../interfaces/econemyData";
 
 const dataFile = join(__dirname, 'economyData.json');
 
@@ -23,6 +23,13 @@ async function fileExists(filePath: string): Promise<boolean> {
   }
 }
 
+/**
+ * Loads the economy data from the specified JSON file.
+ * If the file does not exist, it creates a new one with default data.
+ * If the file is invalid, it replaces it with a new one containing default data.
+ * @returns {Promise<EconomyData>} - A promise that resolves to the loaded economy data.
+ * @throws - If there is an error reading or writing the file, it logs a warning and returns default data.
+ */
 export async function loadData(): Promise<EconomyData> {
   if (!(await fileExists(dataFile))) {
     await fs.writeFile(dataFile, JSON.stringify(defaultEconomyData, null, 2), 'utf-8');
@@ -40,6 +47,13 @@ export async function loadData(): Promise<EconomyData> {
   }
 }
 
+/**
+ * Saves the economy data to the specified JSON file.
+ * If there is an error writing the file, it logs an error message to the console.
+ * @param data - The economy data to save.
+ * @returns {Promise<void>} - A promise that resolves when the data is saved.
+ * @throws - If there is an error writing the file, it logs an error message to the console.
+ */
 export async function saveData(data: EconomyData): Promise<void> {
   try {
     await fs.writeFile(dataFile, JSON.stringify(data, null, 2), 'utf-8');
@@ -49,7 +63,15 @@ export async function saveData(data: EconomyData): Promise<void> {
   }
 }
 
-export async function getUserData(userId: string): Promise<EconomyData['users'][string]> {
+/**
+ * Retrieves the economy data for a specific user.
+ * If the user does not exist, it creates a new user with default data.
+ * This function ensures that the user data is always available.
+ * @param {string} userId - The ID of the user whose data is to be retrieved.
+ * @returns {Promise<UserEconomyData>} - A promise that resolves to the user's economy data.
+ * @throws - If there is an error loading or saving the data, it logs an error message and returns default user data.
+ */
+export async function getUserData(userId: string): Promise<UserEconomyData> {
   const data = await loadData();
   if (!data.users[userId]) {
     data.users[userId] = { ...defaultUserData };
@@ -58,7 +80,15 @@ export async function getUserData(userId: string): Promise<EconomyData['users'][
   return data.users[userId];
 }
 
-export async function getDataAndUser(userId: string): Promise<{ data: EconomyData, userData: EconomyData['users'][string] }> {
+/**
+ * Retrieves the economy data and user data for a specific user.
+ * If the user does not exist, it creates a new user with default data.
+ * This function ensures that both the economy data and user data are always available.
+ * @param {string} userId - The ID of the user whose data is to be retrieved.
+ * @returns {Promise<{ data: EconomyData, userData: UserEconomyData }>} - A promise that resolves to an object containing the economy data and the user's economy data.
+ * @throws - If there is an error loading or saving the data, it logs an error message and returns default user data.
+ */
+export async function getDataAndUser(userId: string): Promise<{ data: EconomyData, userData: UserEconomyData }> {
   const data = await loadData();
   if (!data.users[userId]) {
     data.users[userId] = { ...defaultUserData };
@@ -67,6 +97,14 @@ export async function getDataAndUser(userId: string): Promise<{ data: EconomyDat
   return { data, userData: data.users[userId] };
 }
 
+/**
+ * Retrieves the balance of a specific user.
+ * If the user does not exist, it creates a new user with default data.
+ * This function ensures that the user's balance is always available.
+ * @param {string} userId - The ID of the user whose balance is to be retrieved.
+ * @returns {Promise<number>} - A promise that resolves to the user's balance.
+ * @throws - If there is an error loading or saving the data, it logs an error message and returns 0 as the balance.
+ */
 export async function getBalance(userId: string): Promise<number> {
   const data = await loadData();
   if (!data.users[userId]) {
@@ -76,6 +114,16 @@ export async function getBalance(userId: string): Promise<number> {
   return data.users[userId].balance;
 }
 
+/**
+ * Transfers money from one user to another.
+ * This function checks if the users exist, if the amount is valid, and if the sender has sufficient balance.
+ * It updates both users' balances accordingly.
+ * @param {string} fromId - The ID of the user sending the money.
+ * @param {string} toId - The ID of the user receiving the money.
+ * @param {number} amount - The amount of money to transfer.
+ * @returns {Promise<void>} - A promise that resolves when the transfer is complete.
+ * @throws - If the transfer is invalid (e.g., transferring to oneself, insufficient balance, or invalid amount).
+ */
 export async function transferMoney(fromId: string, toId: string, amount: number): Promise<void> {
   if (fromId === toId) {
     throw new Error("Cannot transfer money to yourself.");
@@ -102,6 +150,14 @@ export async function transferMoney(fromId: string, toId: string, amount: number
   console.log(`[ECO] Transferred ${amount} from ${fromId} to ${toId}.`);
 }
 
+/**
+ * Adds money to a user's balance.
+ * This function checks if the user exists, if the amount is valid, and updates the user's balance accordingly.
+ * @param {string} userId - The ID of the user to whom money will be added.
+ * @param {number} amount - The amount of money to add to the user's balance.
+ * @returns {Promise<void>} - A promise that resolves when the money is added.
+ * @throws - If the amount is invalid (e.g., less than or equal to 0).
+ */
 export async function addMoney(userId: string, amount: number): Promise<void> {
   if (amount <= 0) {
     throw new Error("Amount must be greater than 0.");
@@ -117,6 +173,15 @@ export async function addMoney(userId: string, amount: number): Promise<void> {
   console.log(`[ECO] Added ${amount} to ${userId}'s balance.`); 
 }
 
+/**
+ * Removes money from a user's balance.
+ * This function checks if the user exists, if the amount is valid, and if the user has sufficient balance.
+ * It updates the user's balance accordingly.
+ * @param {string} userId - The ID of the user from whose balance money will be removed.
+ * @param {number} amount - The amount of money to remove from the user's balance.
+ * @returns {Promise<void>} - A promise that resolves when the money is removed.
+ * @throws - If the amount is invalid (e.g., less than or equal to 0) or if there is insufficient balance.
+ */
 export async function removeMoney(userId: string, amount: number): Promise<void> {
   if (amount <= 0) {
     throw new Error("Amount must be greater than 0.");

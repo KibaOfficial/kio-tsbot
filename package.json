@@ -1,6 +1,6 @@
 {
   "name": "kio-tsbot",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "A modular Discord bot written in TypeScript using discord.js",
   "main": "dist/bot.js",
   "scripts": {
@@ -16,7 +16,8 @@
     "discord-player": "^7.1.0",
     "discord-player-youtubei": "^1.4.6",
     "discord.js": "^14.19.3",
-    "dotenv": "^16.5.0"
+    "dotenv": "^16.5.0",
+    "play-dl": "^1.9.7"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",

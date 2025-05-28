@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { CommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getUserData } from "./data";
 
@@ -12,14 +12,14 @@ export const inventory: Command = {
     .setName("inventory")
     .setDescription("Check your inventory in the economy system."),
 
-  execute: async (interaction: CommandInteraction) => {
+  execute: async (interaction) => {
     const userId = interaction.user.id;
 
     // fetch userData from the economy data
     const userData = await getUserData(userId);
 
     // Check if the user has any items in their inventory
-    if (Object.keys(userData.inventory).length === 0) {
+    if (!userData.inventory || userData.inventory.length === 0) {
       await interaction.reply({
         content: "Your inventory is empty. You can buy items from the shop using `/shop` command.",
         flags: 64, // Ephemeral
@@ -28,8 +28,8 @@ export const inventory: Command = {
     }
 
     // Create a formatted string for the inventory items
-    const inventoryItems = Object.entries(userData.inventory)
-      .map(([item, quantity]) => `${item}: ${quantity}`)
+    const inventoryItems = userData.inventory
+      .map(item => `${item.emoji} **${item.name}** - ${item.quantity || 1} (${item.desc})`)
       .join("\n");
 
     // Create an embed to display the inventory

@@ -3,16 +3,25 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { loadData } from "./data";
 
+/**
+ * Top command for Discord bot.
+ * This command retrieves and displays the top 5 most shipped pairs in the server.
+ * It fetches the pairs from the stored data, sorts them by count, and formats the output.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the top command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const top: Command = {
   data: new SlashCommandBuilder()
     .setName("top")
     .setDescription("Shows the top 10 most shipped pairs in the server"),
   
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     if (!interaction.guild) {
       await interaction.reply("This command can only be used in a server.");
       return;

@@ -1,21 +1,30 @@
 // Copyright (c) 2025 KibaOfficial
-// 
+//
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
-import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInGuild } from "../../utils/utils";
 
-// skip command for the music system
-
+/**
+ * Skip command for Discord bot.
+ * This command skips the currently playing song in the voice channel.
+ * It checks if the user is in a voice channel and if the bot is connected to the same channel.
+ * If there is a song to skip, it skips it and provides feedback to the user.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the skip command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const skip: Command = {
   data: new SlashCommandBuilder()
     .setName("skip")
     .setDescription("Skips the current song"),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Is it a guild command?
     if (!(await ensureInGuild(interaction))) return;
 
@@ -58,6 +67,8 @@ export const skip: Command = {
       const currentTrack = queue.currentTrack;
 
       if (currentTrack) {
+        // log the used extractor
+        console.log(`[Music] Extractor used: ${currentTrack.extractor!.identifier || "Unknown"}`);
         content += `\n🎶 **Now playing:** [${currentTrack.title}](${currentTrack.url}) - \`${currentTrack.author}\` [${currentTrack.duration}]`;
       } else {
         content += `\nEs gibt keinen weiteren Song in der Queue.`;

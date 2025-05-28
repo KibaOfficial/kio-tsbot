@@ -12,10 +12,20 @@ import {
 import path from "path";
 import fs from "fs";
 import { Command } from "../../../interfaces/types";
+import { Item, ShopItemsFile } from "../../../interfaces/econemyData";
+import { loadJson } from "../../../utils/jsonUtils";
 
 const itemsPath = path.join(__dirname, "items.json");
 
-
+/**
+ * Shop command for Discord bot.
+ * This command allows users to view the items available for purchase in the economy shop.
+ * If the items file does not exist, it initializes with default items.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the shop command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const shop: Command = {
   data: new SlashCommandBuilder()
     .setName("shop")
@@ -23,8 +33,8 @@ export const shop: Command = {
       "View the items available for purchase in the economy shop."
     ),
 
-  async execute(interaction: CommandInteraction) {
-    let itemsData: any;
+  async execute(interaction) {
+    let itemsData: ShopItemsFile;
     if (!fs.existsSync(itemsPath)) {
       const initialItems = {
         "shop-items": {
@@ -33,29 +43,31 @@ export const shop: Command = {
           items: [
             {
               name: "Nickname Change",
-              description: "Change your nickname in the server for 1 hour.",
+              desc: "Change the nickname of the bot in the server for 1 hour.",
               price: 1000,
-              type: "nickname_change",
+              itemType: "nickname_change",
+              emoji: "📝"
             },
             {
               name: "2x Multiplier",
-              description: "Double your Fops winnings in games for 3 hours.",
+              desc: "Double your Fops winnings in games for 3 hours.",
               price: 1500,
-              type: "multiplier",
+              itemType: "multiplier",
+              emoji: "⏩"
             },
             {
-              name: "Ship Booster",
-              description:
-                "Increases your chance to be shipped for the next shipping.",
+              name: "Ship booster",
+              desc: "Increases your chance to get shipped in the next shipping",
               price: 1200,
-              type: "ship_boost",
+              itemType: "ship_boost",
+              emoji: "🚢"
             },
             {
               name: "Love Letter",
-              description:
-                "Send a highlighted love letter with a custom message.",
+              desc: "Send a highlighted love letter with a custom message.",
               price: 500,
-              type: "love_letter",
+              itemType: "love_letter",
+              emoji: "💌"
             },
           ],
         },
@@ -63,13 +75,13 @@ export const shop: Command = {
       fs.writeFileSync(itemsPath, JSON.stringify(initialItems, null, 2));
       await interaction.reply({
         content: "No items available yet. Initializing shop items... Please try again.",
-        flags: MessageFlags.Ephemeral,
+        flags: 64 // Ephemeral
       });
       return;
     }
 
-    itemsData = JSON.parse(fs.readFileSync(itemsPath, "utf-8"));
-    const items = itemsData["shop-items"]?.items || [];
+    itemsData = loadJson(itemsPath);
+    const items: Item[] = itemsData["shop-items"].items || [];
 
     const embed = new EmbedBuilder()
       .setTitle("Fops 🦊 Shop")
@@ -78,15 +90,15 @@ export const shop: Command = {
       .setFooter({ text: "Use /buy <item_name> to purchase an item." });
 
     items.forEach(
-      (item: { name: string; price: number; description: string }) => {
+      (item: { name: string; price: number; desc: string; emoji?: string }) => {
         embed.addFields({
-          name: item.name,
-          value: `Price: **${item.price}** fops 🦊\n${item.description}`,
+          name: `${item.emoji ? item.emoji + " " : ""}${item.name}`,
+          value: `Price: **${item.price}** fops 🦊\n${item.desc}`,
           inline: false,
         });
       }
     );
 
-    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    await interaction.reply({ embeds: [embed], flags: 64 }); // Ephemeral
   },
 };

@@ -3,17 +3,24 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction, EmbedBuilder, Client } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, Client } from "discord.js";
 import { Command } from "../../interfaces/types";
 
-// help command for the main system
-
+/**
+ * Help command for Discord bot.
+ * This command provides a list of all available commands, grouped by category.
+ * It uses the bot's command collection to dynamically generate the help message.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the help command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const help: Command = {
   data: new SlashCommandBuilder()
     .setName("help")
     .setDescription("Provides information about the available commands"),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     try {
       const client = interaction.client as Client & {
         commands?: Map<string, Command & { category: string }>

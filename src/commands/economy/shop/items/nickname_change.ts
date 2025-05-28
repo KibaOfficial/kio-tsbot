@@ -4,30 +4,27 @@
 // https://opensource.org/licenses/MIT
 
 import {
-  CommandInteraction,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
   ActionRowBuilder,
-  ModalSubmitInteraction
+  ModalSubmitInteraction,
+  ChatInputCommandInteraction
 } from "discord.js";
-import { UserEconomyData } from "../../../../interfaces/econemyData";
+import { ensureInGuild } from "../../../../utils/utils";
 
-// changes the nickname of the bot for 1 hour before resetting it back to the original nickname
-
-export async function useNicknameChange(
-  interaction: CommandInteraction,
-  userId: string,
-  userData: UserEconomyData,
-  allUserData: Record<string, UserEconomyData>
-) {
-  if (!interaction.guild) {
-    await interaction.reply({
-      content: "❌ This command can only be used in a server.",
-      flags: 64
-    });
-    return;
-  }
+/**
+ * useNicknameChange function for changing the bot's nickname in a Discord server.
+ * This function displays a modal to the user to input a new nickname,
+ * changes the bot's nickname to the provided input, and resets it after 1 hour.
+ * It also handles errors and ensures the interaction is only processed in a guild context.
+ * @param {ChatInputCommandInteraction} interaction - The interaction object from Discord.
+ * @returns {Promise<void>} - A promise that resolves when the nickname change is complete.
+ * @throws {Error} - Throws an error if the interaction is not in a guild or if the nickname change fails.
+ */
+export async function useNicknameChange( interaction: ChatInputCommandInteraction ): Promise<void> {
+  // Check: In Guild?
+  if (!(await ensureInGuild(interaction))) return;
 
   const modal = new ModalBuilder()
     .setCustomId("nicknamechange-modal")
@@ -54,7 +51,7 @@ export async function useNicknameChange(
 
     const newNickname = submitted.fields.getTextInputValue("nickname_input").substring(0, 32);
 
-    await interaction.guild.members.me?.setNickname(newNickname);
+    await interaction.guild!.members.me?.setNickname(newNickname);
 
     await submitted.reply({
       content: `✅ Nickname changed to **${newNickname}** for 1 hour.`,

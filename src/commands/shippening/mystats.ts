@@ -7,6 +7,15 @@ import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { loadData } from "./data";
 
+/**
+ * Mystats command for Discord bot.
+ * This command retrieves and displays the shipping statistics for the user who invoked it.
+ * It counts how many times the user has been shipped in the server.
+ * * @type {Command}
+ * * @property {SlashCommandBuilder} data - The command data for the mystats command.
+ * * @property {function} execute - The function that executes the command when invoked.
+ * * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const mystats: Command = {
   data: new SlashCommandBuilder()
     .setName("mystats")
@@ -31,7 +40,6 @@ export const mystats: Command = {
 
     await interaction.reply({
       content: `**Your Shipping Statistics:**\n\nYou have been shipped **${count}** times in this server.`,
-      // ephemeral: true
     })
 
   }

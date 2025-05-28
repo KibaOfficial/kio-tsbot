@@ -1,27 +1,47 @@
 // Copyright (c) 2025 KibaOfficial
-// 
+//
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
-import * as dotenv from 'dotenv';
-import { Command } from './interfaces/types';
-import { join } from 'path';
-import { loadCommands } from './utils/loadCommands';
-import { group } from 'console';
+import {
+  ActivityType,
+  Client,
+  Collection,
+  Events,
+  GatewayIntentBits,
+  REST,
+  Routes,
+} from "discord.js";
+import * as dotenv from "dotenv";
+import { Command } from "./interfaces/types";
+import { join } from "path";
+import { loadCommands } from "./utils/loadCommands";
 
 // Load environment variables from .env file
 dotenv.config();
 
 // Check if required environment variables are set
-if (!process.env.BOT_TOKEN || !process.env.BOT_ID || (process.env.NODE_ENV !== 'production' && !process.env.GUILD_ID)) {
-  console.error('[Main] Missing required environment variables: BOT_TOKEN, BOT_ID, or GUILD_ID\n Please set them in your .env file.');
-  console.error('Ensure you have a .env file with the following variables:');
-  console.error('BOT_TOKEN=<your_bot_token>');
-  console.error('BOT_ID=<your_bot_id>');
-  console.error('GUILD_ID=<your_guild_id> (only needed in development mode)');
+if (
+  !process.env.BOT_TOKEN ||
+  !process.env.BOT_ID ||
+  (process.env.NODE_ENV !== "production" && !process.env.GUILD_ID)
+) {
+  console.error(
+    "[Main] Missing required environment variables: BOT_TOKEN, BOT_ID, or GUILD_ID\n Please set them in your .env file."
+  );
+  console.error("Ensure you have a .env file with the following variables:");
+  console.error("BOT_TOKEN=<your_bot_token>");
+  console.error("BOT_ID=<your_bot_id>");
+  console.error("GUILD_ID=<your_guild_id> (only needed in development mode)");
   process.exit(1);
 }
+
+const statusMessages = [
+  { name: "with commands /help", type: ActivityType.Playing }, // playing status
+  { name: "over the servers", type: ActivityType.Watching }, // watching status
+  { name: "music with /play", type: ActivityType.Listening }, // listening status
+  { name: "everything under control", type: ActivityType.Playing }, // playing status
+];
 
 // Set up the Discord client with necessary intents
 const client = new Client({
@@ -102,10 +122,22 @@ const commands = new Collection<string, Command>();
 // Event: Bot is ready
 client.once(Events.ClientReady, () => {
   console.log(`[Main] Logged in as ${client.user?.tag}! at ${new Date().toLocaleString()}`);
+
+  let i = 0;
+
+  const updateStatus = () => {
+    const status = statusMessages[i % statusMessages.length];
+    client.user?.setActivity(status.name, { type: status.type });
+    console.log(`[Main] Status set to: ${status.name}`);
+    i++;
+  }
+  updateStatus();
+  setInterval(updateStatus, 0.5 * 60 * 1000); // Update status every 30 seconds
+  console.log("[Main] Status updater initialized.");
 });
 
 // Event: Handle incoming slash command interactions
-client.on(Events.InteractionCreate, async interaction => {
+client.on(Events.InteractionCreate, async (interaction) => {
   // Only handle chat input (slash) commands
   if (!interaction.isChatInputCommand()) {
     // Log ignored non-chat input interactions
@@ -131,9 +163,9 @@ client.on(Events.InteractionCreate, async interaction => {
     // Log and reply to errors during command execution
     console.error(`[Main] Error executing command ${interaction.commandName} by ${interaction.user.tag}:`, error);
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+      await interaction.followUp({ content: 'There was an error while executing this command!', flags: 64 });
     } else {
-      await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+      await interaction.reply({ content: 'There was an error while executing this command!', flags: 64 });
     }
     // Log that the user was notified of the error
     console.log(`[Main] Error message sent to user ${interaction.user.tag} for command ${interaction.commandName}`);

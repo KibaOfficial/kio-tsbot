@@ -3,11 +3,22 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction, GuildMember } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
-import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInGuild } from "../../utils/utils";
 
+/**
+ * Leave command for Discord bot.
+ * This command allows the bot to leave the user's voice channel.
+ * It checks if the user is in a voice channel and if the bot is connected to the same channel.
+ * If the bot is connected, it toggles the loop mode for the current song or queue.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the loop command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const loop: Command = {
   data: new SlashCommandBuilder()
     .setName("loop")
@@ -24,7 +35,7 @@ export const loop: Command = {
         .setRequired(true)
     ),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Check: In Guild?
     if (!(await ensureInGuild(interaction))) return;
 

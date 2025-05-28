@@ -3,9 +3,22 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction, PermissionsBitField } from "discord.js";
+import { PermissionsBitField, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
+import { ensurePermissions } from "../../utils/utils";
 
+/**
+ * Ban command for Discord bot.
+ * This command allows a user with the appropriate permissions to ban another user from the server.
+ * It checks if the user has permission to ban members, if the bot has permission to ban members,
+ * and if the user to be banned is not the bot itself or has a higher role than the bot.
+ * If all checks pass, it attempts to ban the user and provides feedback on the success or failure of the operation.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the ban command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ * @throws - If the command is used outside of a guild, if the user lacks permissions, or if the bot cannot ban the specified user.
+ */
 export const ban: Command = {
   data: new SlashCommandBuilder()
     .setName("ban")
@@ -21,7 +34,7 @@ export const ban: Command = {
         .setRequired(false)
     )),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // check if the command is executed in a guild
     if (!interaction.guild) {
       await interaction.reply({
@@ -31,8 +44,8 @@ export const ban: Command = {
       return;
     }
 
-    const targetUser = interaction.options.get("user")?.user;
-    const reason = interaction.options.get("reason")?.value as string || "No reason provided";
+    const targetUser = interaction.options.getUser("user");
+    const reason = interaction.options.getString("reason") || "No reason provided";
 
     // check if the target user is provided
     if (!targetUser) {
@@ -53,7 +66,7 @@ export const ban: Command = {
     }
 
     // check if the user has permission to ban members
-    if (!interaction.memberPermissions?.has(PermissionsBitField.Flags.BanMembers)) {
+    if (await ensurePermissions(interaction, ["BanMembers"])) {
       await interaction.reply({
         content: "You do not have permission to ban members.",
         flags: 64, // Ephemeral

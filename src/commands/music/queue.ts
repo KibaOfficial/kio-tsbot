@@ -3,19 +3,27 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction, EmbedBuilder, GuildMember } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
-import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInGuild } from "../../utils/utils";
 
-// queue command for the music system which should reply with the current list of songs with an embed
-
+/**
+ * Queue command for Discord bot.
+ * This command displays the current music queue in the server.
+ * It shows the currently playing track and the next tracks in the queue.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the queue command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const queue: Command = {
   data: new SlashCommandBuilder()
     .setName("queue")
     .setDescription("Shows the current queue of songs"),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Check: In Guild?
     if (!(await ensureInGuild(interaction))) return;
 
@@ -38,7 +46,6 @@ export const queue: Command = {
     }
 
     const currentTrack = queue.currentTrack;
-
 
     const nextTracks = typeof queue.tracks.toArray === "function" ? queue.tracks.toArray() : [];
 

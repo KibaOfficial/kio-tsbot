@@ -3,19 +3,28 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction, GuildMember } from "discord.js";
+import { SlashCommandBuilder, } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
-import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInGuild } from "../../utils/utils";
 
-// resume command for the music system
-
+/**
+ * Resume command for Discord bot.
+ * This command resumes the paused song in the voice channel.
+ * It checks if the user is in a voice channel and if the bot is connected to the same channel.
+ * If the music is already playing, it informs the user; otherwise, it resumes the music.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the resume command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const resume: Command = {
   data: new SlashCommandBuilder()
     .setName("resume")
     .setDescription("Resume the paused song."),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Check: In Guild?
     if (!(await ensureInGuild(interaction))) return;
 

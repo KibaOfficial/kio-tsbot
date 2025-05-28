@@ -6,7 +6,8 @@
 import { SlashCommandBuilder, CommandInteraction, GuildMember, EmbedBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer, queueLimit } from "../../music/player";
-import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInGuild } from "../../utils/utils";
 
 export const play: Command = {
   data: new SlashCommandBuilder()
@@ -19,7 +20,8 @@ export const play: Command = {
         .setRequired(true)
     ),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
+    await interaction.deferReply();
     // Check: In Guild?
     if (!(await ensureInGuild(interaction))) return;
 
@@ -115,7 +117,9 @@ export const play: Command = {
           .setThumbnail(track.thumbnail || null);
       }
 
-      await interaction.reply({ embeds: [embed] });
+      // log the used extractor
+      console.log(`[Music] Extractor used: ${result.extractor!.identifier || "Unknown"}`);
+      await interaction.editReply({ embeds: [embed] });
       console.log(`[Music] ${interaction.user.tag} added ${result.playlist ? `${tracksToAdd.length} songs from playlist` : `1 song`} to the queue in ${interaction.guild!.name}`);
     } catch (error) {
       console.error(`[Music] Error playing song:`, error);

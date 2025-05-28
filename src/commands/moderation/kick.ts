@@ -5,11 +5,23 @@
 
 import {
   SlashCommandBuilder,
-  CommandInteraction,
   PermissionsBitField,
 } from "discord.js";
 import { Command } from "../../interfaces/types";
+import { ensurePermissions } from "../../utils/utils";
 
+/**
+ * Kick command for Discord bot.
+ * This command allows a user with the appropriate permissions to kick another user from the server.
+ * It checks if the user has permission to kick members, if the bot has permission to kick members,
+ * and if the user to be kicked is not the bot itself or has a higher role than the bot.
+ * If all checks pass, it attempts to kick the user and provides feedback on the success or failure of the operation.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the kick command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ * @throws - If the command is used outside of a guild, if the user lacks permissions, or if the bot cannot kick the specified user.
+ */
 export const kick: Command = {
   data: new SlashCommandBuilder()
     .setName("kick")
@@ -26,7 +38,7 @@ export const kick: Command = {
         .setDescription("Reason for kicking the user")
         .setRequired(false)
     ),
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Only usable in guilds/servers
     if (!interaction.guild) {
       await interaction.reply({
@@ -37,9 +49,7 @@ export const kick: Command = {
     }
 
     // Check if the user has permission to kick members
-    if (
-      !interaction.memberPermissions?.has(PermissionsBitField.Flags.KickMembers)
-    ) {
+    if (await ensurePermissions(interaction, ["KickMembers"])) {
       await interaction.reply({
         content: "You do not have permission to kick members.",
         ephemeral: true,

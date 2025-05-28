@@ -5,27 +5,31 @@
     "items": [
       {
         "name": "Nickname Change",
-        "description": "Change your nickname in the server for 1 hour.",
+        "desc": "Change the nickname of the bot in the server for 1 hour.",
         "price": 1000,
-        "type": "nickname_change"
+        "itemType": "nickname_change",
+        "emoji": "📝"
       },
       {
         "name": "2x Multiplier",
-        "description": "Double your Fops winnings in games for 3 hours.",
+        "desc": "Double your Fops winnings in games for 3 hours.",
         "price": 1500,
-        "type": "multiplier"
+        "itemType": "multiplier",
+        "emoji": "⏩"
       },
       {
-        "name": "Ship Booster",
-        "description": "Increases your chance to be shipped for the next shipping.",
+        "name": "Ship booster",
+        "desc": "Increases your chance to get shipped in the next shipping",
         "price": 1200,
-        "type": "ship_boost"
+        "itemType": "ship_boost",
+        "emoji": "🚢"
       },
       {
         "name": "Love Letter",
-        "description": "Send a highlighted love letter with a custom message.",
+        "desc": "Send a highlighted love letter with a custom message.",
         "price": 500,
-        "type": "love_letter"
+        "itemType": "love_letter",
+        "emoji": "💌"
       }
     ]
   }

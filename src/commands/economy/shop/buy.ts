@@ -4,16 +4,24 @@
 // https://opensource.org/licenses/MIT
 
 import path from "path";
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 
 import { Command } from "../../../interfaces/types";
-import { loadJson, saveJson } from "../../utils/jsonUtils";
+import { loadJson } from "../../../utils/jsonUtils";
 import { getDataAndUser, removeMoney, saveData } from "../data";
-import { ShopData, Item } from "../../../interfaces/econemyData";
+import { Item, ShopItemsFile } from "../../../interfaces/econemyData";
 
 const itemsPath = path.join(__dirname, "items.json");
-const economyPath = path.join(__dirname, "../economy.json");
 
+/**
+ * Buy command for Discord bot.
+ * This command allows users to buy items from the shop.
+ * It checks if the item exists, if the user has enough balance, and processes the purchase.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the buy command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const buy: Command = {
   data: new SlashCommandBuilder()
     .setName("buy")
@@ -24,25 +32,29 @@ export const buy: Command = {
         .setRequired(true)
     ),
 
-  async execute(interaction: CommandInteraction) {
-    const itemName = interaction.options.get("item")?.value as string;
+  async execute(interaction) {
+    const itemName = interaction.options.getString("item", true);
     const userId = interaction.user.id;
 
-    const shopData: ShopData = loadJson(itemsPath);
-    const shopItems: Item[] = shopData["shop-items"]?.items || [];
-    if (!shopData || !shopData["shop-items"] || !Array.isArray(shopData["shop-items"].items)) {
+    const shopItems: ShopItemsFile = loadJson(itemsPath);
+    if (!shopItems || !shopItems["shop-items"] || !Array.isArray(shopItems["shop-items"].items)) {
+      console.error("[ECO] Shop items data is not available or corrupted.");
       await interaction.reply({
         content: "Shop data is not available or corrupted.",
-        flags: 64, // Suppress the reply
+        flags: 64 // Ephemeral
       });
       return;
     }
 
-    const item = shopItems.find(i => i.name.toLowerCase() === itemName.toLowerCase());
-    if (!item) {
+    // Find item by name or itemType (fallback)
+    let itemObj: Item | undefined = shopItems["shop-items"].items.find((i: Item) => i.name.toLowerCase() === itemName.toLowerCase());
+    if (!itemObj) {
+      itemObj = shopItems["shop-items"].items.find((i: Item) => i.itemType.toLowerCase() === itemName.toLowerCase());
+    }
+    if (!itemObj) {
       await interaction.reply({
-        content: `❌ Item "${itemName}" not found in the shop.`,
-        flags: 64, // Suppress the reply
+        content: `Item "${itemName}" not found in the shop.`,
+        flags: 64 // Ephemeral
       });
       return;
     }
@@ -51,40 +63,33 @@ export const buy: Command = {
     if (!data || !userData) {
       await interaction.reply({
         content: "Failed to retrieve user data.",
-        flags: 64, // Suppress the reply
+        flags: 64 // Ephemeral
       });
       return;
     }
 
-    if (userData.balance < item.price) {
+    if (userData.balance < itemObj.price) {
       await interaction.reply({
-        content: `❌ You do not have enough fops 🦊 to buy "${item.name}". You need **${item.price}** fops 🦊.`,
-        flags: 64, // Suppress the reply
+        content: `❌ You do not have enough fops 🦊 to buy \"${itemObj.name}\". You need **${itemObj.price}** fops 🦊.`,
+        flags: 64 // Ephemeral
       });
       return;
     }
 
     try {
-      await removeMoney(userId, item.price);
-
-      if (!userData.inventory) {
-        userData.inventory = [];
-      }
-      userData.inventory.push(item.type);
-
+      await removeMoney(userId, itemObj.price);
+      if (!userData.inventory) userData.inventory = [];
+      userData.inventory.push({ ...itemObj });
       await saveData(data);
-
       await interaction.reply({
-        content: `✅ You have successfully bought "${item.name}" for **${item.price}** fops 🦊!`,
+        content: `✅ You have successfully bought \"${itemObj.name}\" for **${itemObj.price}** fops 🦊!`,
       });
     } catch (error) {
       console.error("[ECO] Error while processing buy command:", error);
       await interaction.reply({
-        content: "❌ An error occurred while processing your purchase. Please try again later.",
-        flags: 64, // Suppress the reply
+        content: `❌ An error occurred while processing your purchase. Please try again later.`,
+        flags: 64 // Ephemeral
       });
-      return;
     }
-
   }
 }

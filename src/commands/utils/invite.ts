@@ -3,14 +3,23 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 
+/**
+ * Invite command for Discord bot.
+ * This command replies with the bot's invite link, allowing users to invite the bot to their servers.
+ * It uses the bot's client ID and predefined permissions to generate the invite URL.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the invite command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const invite: Command = {
   data: new SlashCommandBuilder()
     .setName("invite")
     .setDescription("Replies with the bot's invite link"),
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     const clientId = process.env.BOT_ID;
     if (!clientId) {
       console.log("[Invite] Bot ID is not set in the environment variables.");

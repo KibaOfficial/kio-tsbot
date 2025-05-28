@@ -3,16 +3,28 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
-import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInGuild } from "../../utils/utils";
 
+/**
+ * Leave command for Discord bot.
+ * This command allows the bot to leave the user's voice channel.
+ * It checks if the user is in a voice channel and if the bot is connected to the same channel.
+ * If the bot is connected, it deletes the queue or disconnects from the voice channel.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the leave command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ * @description This command is used to make the bot leave the voice channel it is currently in.
+ */
 export const leave: Command = {
   data: new SlashCommandBuilder()
     .setName("leave")
     .setDescription("Leave the voice channel"),
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Check: In Guild?
     if (!(await ensureInGuild(interaction))) return;
 

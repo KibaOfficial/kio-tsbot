@@ -3,19 +3,28 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
-import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInGuild } from "../../utils/utils";
 
-// stop command for the music system
-
+/**
+ * Stop command for Discord bot.
+ * This command stops the currently playing song, clears the queue, and makes the bot leave the voice channel.
+ * It checks if the user is in a voice channel and if the bot is connected to the same channel.
+ * If the music is already stopped, it informs the user; otherwise, it stops the music and clears the queue.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the stop command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const stop: Command = {
   data: new SlashCommandBuilder()
     .setName("stop")
     .setDescription("Stops the current song, clears the queue and leaves the voice channel"),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Check: In Guild?
     if (!(await ensureInGuild(interaction))) return;
 

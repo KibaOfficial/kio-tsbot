@@ -7,6 +7,10 @@
 
 # Kio-TsBot 🦊🤖
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/KibaOfficial/kio-tsbot/master/src/assets/kio-tsbot-logo.png" alt="Kio-TsBot Logo" width="120" />
+</p>
+
 **Kio-TsBot** is the modern, modular successor to [DiscordTSBot](https://github.com/KibaOfficial/DiscordTSBot) — a Discord bot written in TypeScript. Kio-TsBot is designed for simplicity, flexibility, and extensibility, making it easy to build, customize, and scale your own Discord bot.
 
 ---
@@ -49,16 +53,28 @@
   Earn, spend, and play with fops 🦊 (the in-bot currency) through commands like `/balance`, `/pay`, `/daily`, and `/playgame`.
 
 - **🛡️ Moderation Commands:**  
-  Kick, ban, and timeout users with commands like `/kick`, `/ban`, and `/timeout`.
+  Kick, ban, and timeout users with commands like `/kick`, `/ban`, `/timeout` & `/clear`.
+
+- **🛍️ Shop and Inventory:**
+  Buy, sell, and manage items with commands like `/shop`, `/buy`, `/item`, and `/inventory`.  
+  Items are defined in `src/commands/shop/items.json` with properties like `name`, `desc`, `price`, `itemType`, and `emoji`.
 
 - **🎵 Music System:**  
   Play music in voice channels with commands like `/join`, `/leave`, `/play`, and more using [discord-player](https://github.com/Androz2091/discord-player) and [discord-player-youtubei](https://github.com/retrouser955/discord-player-youtubei).
+
+- **📜 Slash Commands:**
+  Fully supports Discord's slash commands with rich interactions and autocomplete.
+
+- **🧪 Command Loading:**
+  Automatically loads commands from `src/commands/` and subfolders, allowing for organized command management.
 
 - **📂 Command Templates:**  
   Easily create new commands with a template structure in `src/commands/CommandTemplate`.
 
 - **♻️ Hot-reloading:**  
   Development mode with TypeScript and hot-reloading for fast iteration.
+
+- and much much more! 🚀
 
 ---
 
@@ -166,6 +182,69 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 ---
 
 ## Changelog
+
+### v0.1.14 (29 May 2025)
+- First of all, i did a loooot of refactoring and code cleanup to try to keep it DRY.
+  and also i just wanted to just say here 
+  ```
+  Just thanks to everyone who contributed to this project,
+  either by helping testing the bot on my private testing server,
+  or by contributing code, ideas, or just by using the bot.
+  I really appreciate it! ❤️
+  ```
+#### 🤖 **bot.ts**
+  - Added rotating status messages for the bot.
+  - Improved error output for missing environment variables.
+  - Unified error replies for command errors (`flags: 64` statt `ephemeral: true`).
+
+#### 🛍️ **items.json**
+  - Updated to a new item format:
+    ```json
+    {
+      "name": "ItemDisplayName",
+      "desc": "ItemDescription.",
+      "price": 0,
+      "itemType": "ItemTypeName",
+      "emoji": "ItemEmoji"
+    }
+    ```
+
+#### 🛒 **inventory.ts, buy.ts, items.ts, shop.ts**
+  - Refactored to use the new `Item` data type.
+  - User inventories now store an array of `Item` objects instead of strings.
+  - Shop and inventory commands now display item emoji, name, and description.
+
+#### 🎵 **music/player.ts**
+  - Added a secondary extractor (`PlaydlExtractor`) using `play-dl` as a fallback if YouTube extraction fails.
+  - Registered both `YoutubeiExtractor` and `PlaydlExtractor` with the music player.
+  - Set a queue limit of 25 songs.
+
+#### 🧹 **clear.ts**
+  - Added a new `/clear` command for mass deleting messages in a channel (supports clearing all or a specific number).
+
+#### 🎶 **Music System (all music commands)**
+  - Moved `ensureInGuild()` to the main `utils.ts` file for consistency.
+  - All music commands now use the new utility functions for permission and context checks.
+
+#### 🎵 **play.ts, skip.ts**
+  - Added logs to show which extractor is used for each song.
+  - Deferred replies if the player takes too long to respond, improving UX for slow operations.
+
+#### 💰 **economyData.ts (interfaces/econemyData.ts, data.ts)**
+  - Updated the `Item` type to be more specific (includes name, desc, price, itemType, emoji, etc.).
+  - Changed the `inventory` field in `UserEconomyData` from `string[]` to `Item[]`.
+
+#### 🛡️ **types.ts**
+  - Migrated command signatures from `CommandInteraction` to `ChatInputCommandInteraction`.
+  - Added a new type `PermissionFlag` using `keyof typeof PermissionsBitField.Flags` for type-safe permission checks.
+
+#### 🛠️ **utils.ts**
+  - Created a new file for common utility functions, including `ensurePermissions()` and `ensureInGuild()`.
+
+#### 🔊 **voiceUtils.ts**
+  - Moved `ensureInGuild()` out; now imported from `utils.ts`.
+  - Focused on voice channel utilities only.
+
 
 ### v0.1.13 (27 May 2025)
 - ♻️ Refactored all music commands to use shared voice channel utility functions (`voiceUtils.ts`) for cleaner and more maintainable code.

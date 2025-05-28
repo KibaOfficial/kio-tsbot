@@ -3,16 +3,25 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { incrementPairCount, loadData, saveData } from "./data";
 
+/**
+ * Ship command for Discord bot.
+ * This command randomly selects two users from the server and "ships" them together.
+ * It checks if the pair has been shipped recently and updates the count of pairs.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the ship command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const ship: Command = {
   data: new SlashCommandBuilder()
     .setName("ship")
     .setDescription("Ships two random users in the server"),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     if (!interaction.guild) {
       await interaction.reply("This command can only be used in a server.");
       return;

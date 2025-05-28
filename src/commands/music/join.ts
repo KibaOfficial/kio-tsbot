@@ -3,16 +3,27 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction, GuildMember } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
-import { ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInGuild } from "../../utils/utils";
 
+/**
+ * Join command for Discord bot.
+ * This command allows the bot to join the user's voice channel.
+ * It checks if the user is in a voice channel and if the bot is already connected to a voice channel.
+ * If the bot is not connected, it creates a new queue and connects to the user's voice channel.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the join command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const join: Command = {
   data: new SlashCommandBuilder()
     .setName("join")
     .setDescription("Join your voice channel"),
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Check: In Guild?
     if (!(await ensureInGuild(interaction))) return;
 

@@ -7,6 +7,15 @@ import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { loadData } from "./data";
 
+/**
+ * last command for Discord bot.
+ * This command retrieves and displays the last shipped pair of users in the server.
+ * It checks if the last pair exists and if the members are still in the server.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the last command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const last: Command = {
   data: new SlashCommandBuilder()
     .setName("last")

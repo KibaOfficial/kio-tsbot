@@ -5,11 +5,20 @@
 
 import {
   SlashCommandBuilder,
-  CommandInteraction,
   PermissionsBitField,
 } from "discord.js";
 import { Command } from "../../interfaces/types";
+import { ensurePermissions } from "../../utils/utils";
 
+/**
+ * Timeout command for Discord bot.
+ * This command allows moderators to timeout a user in the server for a specified duration.
+ * It checks if the user has permission to timeout members and if the bot has the required permissions.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the timeout command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const timeout: Command = {
   data: new SlashCommandBuilder()
     .setName("timeout")
@@ -33,7 +42,7 @@ export const timeout: Command = {
         .setRequired(false)
     ),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Only usable in guilds/servers
     if (!interaction.guild) {
       await interaction.reply({
@@ -52,11 +61,7 @@ export const timeout: Command = {
       "No reason provided"; // reason for the timeout
 
     // check if the user has permission to timeout members
-    if (
-      !interaction.memberPermissions?.has(
-        PermissionsBitField.Flags.ModerateMembers
-      )
-    ) {
+    if (await ensurePermissions(interaction, ["ModerateMembers"])) {
       await interaction.reply({
         content: "You do not have permission to timeout members.",
         flags: 64, // ephemeral

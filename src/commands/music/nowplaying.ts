@@ -3,17 +3,28 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction, EmbedBuilder } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
-import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInGuild } from "../../utils/utils";
 
+/**
+ * Now Playing command for Discord bot.
+ * This command shows the currently playing song in the voice channel.
+ * It checks if the user is in a voice channel and if the bot is connected to the same channel.
+ * If a song is currently playing, it displays the song information in an embed.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the nowplaying command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const nowplaying: Command = {
   data: new SlashCommandBuilder()
     .setName("nowplaying")
     .setDescription("Shows the currently playing song"),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Check: In Guild?
     if (!(await ensureInGuild(interaction))) return;
 

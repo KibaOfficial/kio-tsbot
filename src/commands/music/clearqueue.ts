@@ -3,19 +3,27 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction, GuildMember } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
-import { ensureBotInSameVoice, ensureInGuild, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
+import { ensureInGuild } from "../../utils/utils";
 
-// clearqueue command for the music system
-
+/**
+ * Clearqueue command for Discord bot.
+ * This command clears the current music queue in the server.
+ * It checks if the user is in a voice channel and if the bot is in the same channel before clearing the queue.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the clearqueue command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ */
 export const clearqueue: Command = {
   data: new SlashCommandBuilder()
     .setName("clearqueue")
     .setDescription("Clears the current music queue."),
 
-  async execute(interaction: CommandInteraction) {
+  async execute(interaction) {
     // Check: In Guild?
     if (!(await ensureInGuild(interaction))) return;
 

@@ -2,16 +2,26 @@
 // 
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
-import { SlashCommandBuilder, CommandInteraction, MessageFlags } from "discord.js";
+import { SlashCommandBuilder, MessageFlags } from "discord.js";
 import { Command } from "../../../interfaces/types";
 import path from "path";
-import { loadJson, saveJson } from "../../utils/jsonUtils";
-import { saveData } from "../data";
+import { loadJson, saveJson } from "../../../utils/jsonUtils";
 import { useNicknameChange } from "./items/nickname_change";
+import { Item, ShopItemsFile } from "../../../interfaces/econemyData";
 
 const itemsPath = path.join(__dirname, "items.json");
 const economyPath = path.join(__dirname, "../economyData.json");
 
+/**
+ * Command to use an item from the user's inventory.
+ * This command allows users to use items they have purchased from the shop.
+ * It checks if the user has the item, removes it from their inventory, and executes the item's effect.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the item command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ * @throws {Error} - If the item is not found in the shop or the user's inventory, or if the item cannot be used.
+ */
 export const item: Command = {
   data: new SlashCommandBuilder()
     .setName("item")
@@ -22,14 +32,14 @@ export const item: Command = {
         .setRequired(true)
     ),
 
-  async execute(interaction: CommandInteraction) {
-    const itemName = interaction.options.get("item")?.value as string;
+  async execute(interaction) {
+    const itemName = interaction.options.getString("item", true);
     const userId = interaction.user.id;
 
     // load items and economy data
-    const itemsData = loadJson(itemsPath);
-    const shopItems = itemsData['shop-items']?.items || [];
+    const itemsData: ShopItemsFile = loadJson(itemsPath);
     const allUserData = loadJson(economyPath);
+
     // Ensure users property exists
     if (!allUserData.users) allUserData.users = {};
     const userData = allUserData.users[userId];
@@ -42,11 +52,11 @@ export const item: Command = {
       return;
     }
 
-    // find item in shop to get type
-    let itemObj = shopItems.find((i: any) => i.name.toLowerCase() === itemName.toLowerCase());
+    // find item by name or itemType
+    let itemObj = itemsData["shop-items"].items.find((i: Item) => i.name.toLowerCase() === itemName.toLowerCase());
     if (!itemObj) {
       // Try to find by type as fallback (for users entering the type directly)
-      itemObj = shopItems.find((i: any) => i.type.toLowerCase() === itemName.toLowerCase());
+      itemObj = itemsData["shop-items"].items.find((i: Item) => i.itemType.toLowerCase() === itemName.toLowerCase());
     }
     if (!itemObj) {
       await interaction.reply({
@@ -57,7 +67,7 @@ export const item: Command = {
     }
 
     // check if user has the item in their inventory
-    const itemIdx = userData.inventory.indexOf(itemObj.type);
+    const itemIdx = userData.inventory.findIndex((invItem: Item) => invItem.itemType === itemObj.itemType);
     if (itemIdx === -1) {
       await interaction.reply({
         content: `You do not have the item "${itemName}" in your inventory.`,
@@ -68,12 +78,11 @@ export const item: Command = {
 
     // remove item from inventory
     userData.inventory.splice(itemIdx, 1);
-    allUserData.users[userId] = userData; // <-- Das ist wichtig!
+    allUserData.users[userId] = userData;
     saveJson(economyPath, allUserData);
 
-    switch (itemObj.type) {
+    switch (itemObj.itemType) {
       case "nickname_change":
-        // TODO: Implement nickname change logic
         await useNicknameChange(interaction, userId, userData, allUserData);
         break;
       case "multiplier":

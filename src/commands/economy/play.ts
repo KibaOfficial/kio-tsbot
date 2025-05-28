@@ -3,10 +3,22 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { CommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { playSlots } from "./games/slots";
+import { Command } from "../../interfaces/types";
 
-export const playgame = {
+/**
+ * Play command for Discord bot.
+ * This command allows users to play a game to earn fops 🦊
+ * It currently supports a slot machine game.
+ * Users can choose a game and specify a bet amount.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the playgame command.
+ * @property {function} execute - The function that executes the command when invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ * @throws - If the game is unknown or if the bet amount is invalid.
+ */
+export const playgame: Command = {
   data: new SlashCommandBuilder()
     .setName("playgame")
     .setDescription("Play a game to earn fops 🦊!")
@@ -25,9 +37,9 @@ export const playgame = {
         .setMinValue(1)
         .setMaxValue(10000)
     ),
-  async execute(interaction: CommandInteraction) {
-    const game = interaction.options.get("game")?.value as string;
-    const bet = interaction.options.get("bet")?.value as number;
+  async execute(interaction) {
+    const game = interaction.options.getString("game", true);
+    const bet = interaction.options.getInteger("bet", true);
 
     switch (game) {
       case "slot":
@@ -36,7 +48,7 @@ export const playgame = {
       default:
         await interaction.reply({
           content: "Unknown game. Please choose a valid game.",
-          flags: MessageFlags.Ephemeral
+          flags: 64 // Ephemeral message
         });
         break;
     }
