@@ -5,6 +5,8 @@
 
 import { ChatInputCommandInteraction } from "discord.js";
 import { addMoney, removeMoney } from "../data";
+import { AppDataSource } from "../../../utils/data/db";
+import { User } from "../../../utils/data/entity/User";
 
 const slotEmojis = [
   { emoji: "🍒", multiplier: 3 },
@@ -38,9 +40,24 @@ function getRandomEmoji() {
  */
 export async function playSlots(interaction: ChatInputCommandInteraction, bet: number, activeMultiplier: boolean = false): Promise<void> {
   const userId = interaction.user.id;
+  console.log(`[SLOTS] User ${userId} is playing slots with a bet of ${bet} fops 🦊.`);
+  
+  // Get: user from database
+  const userRepo = AppDataSource.getRepository(User);
+  let user = await userRepo.findOne({ where: { id: userId } });
+  if (!user) {
+    // If user does not exist, create a new user with default
+    user = new User(userId, 0, undefined, undefined, undefined);
+    await userRepo.save(user);
+    console.log(`[SLOTS] Created new user ${userId} with default balance.`);
+    await interaction.reply({
+      content: `Welcome to the slot machine! You have been given **0 fops 🦊**. Please earn some money before playing!`,
+      flags: 64 // Ephemeral
+    });
+  }
 
   try {
-    await removeMoney(userId, bet);
+    await removeMoney(user!, bet);
   } catch (error) {
     console.error(`[SLOTS] Error removing money for user ${userId}:`, error);
     await interaction.reply({
@@ -68,7 +85,7 @@ export async function playSlots(interaction: ChatInputCommandInteraction, bet: n
     const multiplier = match?.multiplier ?? 1;
     reward = Math.floor(bet * multiplier);
     // add x2 if activeMultiplier
-    await addMoney(userId, reward * (activeMultiplier ? 2 : 1));
+    await addMoney(user, reward * (activeMultiplier ? 2 : 1));
     console.log(`[SLOTS] User ${userId} won ${reward * (activeMultiplier ? 2 : 1)} fops 🦊 with multiplier ${activeMultiplier ? "active" : "inactive"}!`);
   } else {
     console.log(`[ECO]  `)

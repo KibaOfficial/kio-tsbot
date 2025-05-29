@@ -3,15 +3,14 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import path from "path";
 import { SlashCommandBuilder } from "discord.js";
 
 import { Command } from "../../../interfaces/types";
-import { loadJson } from "../../../utils/jsonUtils";
-import { getDataAndUser, removeMoney, addItem } from "../data";
-import { Item, ShopItemsFile } from "../../../interfaces/econemyData";
-
-const itemsPath = path.join(__dirname, "items.json");
+import { AppDataSource } from "../../../utils/data/db";
+import { Shop } from "../../../utils/data/entity/Shop";
+import { Item } from "../../../utils/data/entity/Item";
+import { User } from "../../../utils/data/entity/User";
+import { addItem } from "../data";
 
 /**
  * Buy command for Discord bot.
@@ -30,28 +29,36 @@ export const buy: Command = {
       option.setName("item")
         .setDescription("The name of the item to buy")
         .setRequired(true)
+        .addChoices(
+          { name: "Nickname Change", value: "nickname_change" },
+          { name: "Multiplier", value: "multiplier" },
+        ),
     ),
 
   async execute(interaction) {
     const itemName = interaction.options.getString("item", true);
     const userId = interaction.user.id;
 
-    const shopItems: ShopItemsFile = loadJson(itemsPath);
-    if (!shopItems || !shopItems["shop-items"] || !Array.isArray(shopItems["shop-items"].items)) {
-      console.error("[ECO] Shop items data is not available or corrupted.");
-      await interaction.reply({
-        content: "Shop data is not available or corrupted.",
-        flags: 64 // Ephemeral
-      });
-      return;
+    // load shop from DB
+    const shop = await AppDataSource.getRepository(Shop).findOne({ where: { id: 1 } });
+
+    // get user data from db
+    const userRepository = AppDataSource.getRepository(User);
+    let user = await userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      // If user does not exist, create a new user with default data
+      user = new User(
+        userId,
+        0,
+        undefined, // lastDaily
+        [], // inventory
+        undefined // multiplierExpiresAt
+      );
     }
 
-    // Find item by name or itemType (fallback)
-    let itemObj: Item | undefined = shopItems["shop-items"].items.find((i: Item) => i.name.toLowerCase() === itemName.toLowerCase());
-    if (!itemObj) {
-      itemObj = shopItems["shop-items"].items.find((i: Item) => i.itemType.toLowerCase() === itemName.toLowerCase());
-    }
-    if (!itemObj) {
+    // Find item by name
+    const shopItem = shop!.items.find((i: Item) => i.name.toLowerCase() === itemName.toLowerCase() || i.itemType.toLowerCase() === itemName.toLowerCase());
+    if (!shopItem) {
       await interaction.reply({
         content: `Item "${itemName}" not found in the shop.`,
         flags: 64 // Ephemeral
@@ -59,35 +66,32 @@ export const buy: Command = {
       return;
     }
 
-    const { data, userData } = await getDataAndUser(userId);
-    if (!data || !userData) {
+    // Check if the user has enough balance
+    if (user.balance < shopItem.price) {
       await interaction.reply({
-        content: "Failed to retrieve user data.",
+        content: `You do not have enough fops 🦊 to buy "${shopItem.name}". You need **${shopItem.price}** fops 🦊.`,
         flags: 64 // Ephemeral
       });
       return;
     }
 
-    if (userData.balance < itemObj.price) {
+    // Deduct the price from the user's balance
+    user.balance -= shopItem.price;
+    // Add the item to the user's inventory
+    if (!(await addItem(userId, shopItem))) {
+      console.log(`[ECO] Failed to add item ${shopItem.name} to user ${userId}'s inventory.`);
       await interaction.reply({
-        content: `❌ You do not have enough fops 🦊 to buy \"${itemObj.name}\". You need **${itemObj.price}** fops 🦊.`,
+        content: `❌ Failed to add item "${shopItem.name}" to your inventory. Please try again later.`,
         flags: 64 // Ephemeral
       });
       return;
     }
+    // Reply to the user with a success message
+    await interaction.reply({
+      content: `✅ You have successfully bought "${shopItem.name}" for **${shopItem.price}** fops 🦊!`,
+      flags: 64 // Ephemeral
+    });
 
-    try {
-      await removeMoney(userId, itemObj.price);
-      await addItem(userId, itemObj); // Use addItem to handle quantity
-      await interaction.reply({
-        content: `✅ You have successfully bought "${itemObj.name}" for **${itemObj.price}** fops 🦊!`,
-      });
-    } catch (error) {
-      console.error("[ECO] Error while processing buy command:", error);
-      await interaction.reply({
-        content: `❌ An error occurred while processing your purchase. Please try again later.`,
-        flags: 64 // Ephemeral
-      });
-    }
+    console.log(`[ECO] User ${interaction.user.username} (${userId}) bought item: ${shopItem.name} for ${shopItem.price} fops 🦊`);
   }
 }

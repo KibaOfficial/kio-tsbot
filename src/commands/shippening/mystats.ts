@@ -5,16 +5,19 @@
 
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
 import { Command } from "../../interfaces/types";
-import { loadData } from "./data";
+import { AppDataSource } from "../../utils/data/db";
+import { Ship } from "../../utils/data/entity/Ship";
 
 /**
- * Mystats command for Discord bot.
- * This command retrieves and displays the shipping statistics for the user who invoked it.
- * It counts how many times the user has been shipped in the server.
- * * @type {Command}
- * * @property {SlashCommandBuilder} data - The command data for the mystats command.
- * * @property {function} execute - The function that executes the command when invoked.
- * * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ * Command to show the user's shipping statistics.
+ * This command retrieves the shipping data for the user in the guild,
+ * counts how many times the user has been shipped,
+ * and replies with the shipping statistics.
+ * @type {Command}
+ * @property {SlashCommandBuilder} data - The command data for the slash command.
+ * @property {Function} execute - The function to execute when the command is invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command is executed.
+ * @throws {Error} - If the command is not used in a guild or if there is no shipping data found.
  */
 export const mystats: Command = {
   data: new SlashCommandBuilder()
@@ -22,25 +25,43 @@ export const mystats: Command = {
     .setDescription("Shows your shipping statistics"),
 
   async execute(interaction: CommandInteraction) {
-    if (!interaction.guild) {
-      await interaction.reply("This command can only be used in a server.");
+    // no need to check if it's in guild
+    const userId = interaction.user.id;
+    const ship = await AppDataSource.getRepository(Ship).findOne({
+      where: { id: interaction.guild!.id },
+      select: {
+        pairsCount: true,
+      },
+    });
+
+    if (!ship || !ship.pairsCount) {
+      await interaction.reply({
+        content: "No shipping data found.",
+        flags: 64 // Ephemeral
+      });
       return;
     }
 
-    const userId = interaction.user.id;
-    const data = await loadData();
-
-    let count = 0;
-
-    for (const pairKey in data.pairsCount) {
-      if (pairKey.includes(userId)) {
-        count += data.pairsCount[pairKey];
+    // Count how many times the user has been shipped
+    const count = Object.entries(ship.pairsCount).reduce((acc, [pairKey, pairCount]) => {
+      const [id1, id2] = pairKey.split('-');
+      if (id1 === userId || id2 === userId) {
+        return acc + pairCount;
       }
+      return acc;
+    }, 0);
+
+    if (count === 0) {
+      await interaction.reply({
+        content: "You have not been shipped in this server yet.",
+        flags: 64 // Ephemeral
+      });
+      return;
     }
 
+    // Reply with the shipping statistics
     await interaction.reply({
       content: `**Your Shipping Statistics:**\n\nYou have been shipped **${count}** times in this server.`,
-    })
-
+    });
   }
 }

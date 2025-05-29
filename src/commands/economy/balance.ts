@@ -5,16 +5,19 @@
 
 import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
-import { getUserData } from "./data";
+import { AppDataSource } from "../../utils/data/db";
+import { User } from "../../utils/data/entity/User";
+
 
 /**
- * Balance command for Discord bot.
- * This command allows users to check their balance in the economy system.
- * It retrieves the user's balance from the database and sends a reply with the balance amount.
+ * Command to check the user's balance in the economy system.
+ * This command retrieves the user's balance from the database.
+ * If the user does not exist, it creates a new user with a default balance.
  * @type {Command}
- * @property {SlashCommandBuilder} data - The command data for the balance command.
- * @property {function} execute - The function that executes the command when invoked.
- * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ * @property {SlashCommandBuilder} data - The command data for the slash command.
+ * @property {Function} execute - The function to execute when the command is invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command is executed.
+ * @throws {Error} - If there is an issue retrieving or creating the user data.
  */
 export const balance: Command = {
   data: new SlashCommandBuilder()
@@ -22,12 +25,32 @@ export const balance: Command = {
     .setDescription("Check your balance in the economy system."),
 
   execute: async (interaction) => {
-    const userId = interaction.user.id;
-    const userData = await getUserData(userId);
+    // Get user data from the database
+    const userRepo = AppDataSource.getRepository(User);
+    let user = await userRepo.findOne({
+      where: { id: interaction.user.id },
+    });
+
+    if (!user) {
+      // If user does not exist, create a new user with default
+      user = new User(
+        interaction.user.id,
+        0, // Initial balance
+        undefined, // lastDaily
+        undefined, // inventory
+        undefined, // multiplierExpiresAt
+      );
+      await userRepo.save(user);
+      await interaction.reply({
+        content: `Your balance is: **${user.balance}** fops 🦊\n\nWelcome to the economy system!`,
+        flags: 64, // Ephemeral
+      });
+      return;
+    }
 
     await interaction.reply({
       content:
-        `Your balance is: **${userData.balance}** fops 🦊\n\n`,
+        `Your balance is: **${user.balance}** fops 🦊\n\n`,
         flags: 64, // Ephemeral
     });
   },

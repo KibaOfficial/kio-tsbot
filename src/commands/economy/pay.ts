@@ -6,17 +6,17 @@
 import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { transferMoney } from "./data";
+import { convertDiscordUserToUser } from "../../utils/utils";
 
 /**
- * Pay command for Discord bot.
- * This command allows users to send fops 🦊 to another user.
- * It checks if the user has provided a valid amount and user to pay.
- * If the transfer is successful, it confirms the transaction.
- * If there is an error, it provides feedback on the failure.
+ * Command to send fops to another user.
+ * This command allows a user to transfer a specified amount of fops to another user.
+ * It checks if the sender has sufficient balance and handles errors gracefully.
  * @type {Command}
- * @property {SlashCommandBuilder} data - The command data for the pay command.
- * @property {function} execute - The function that executes the command when invoked.
- * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ * @property {SlashCommandBuilder} data - The command data for the slash command.
+ * @property {Function} execute - The function to execute when the command is invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command is executed.
+ * @throws {Error} - If the transfer is invalid (e.g., transferring to oneself, insufficient balance, or invalid amount).
  */
 export const pay: Command = {
   data: new SlashCommandBuilder()
@@ -33,23 +33,14 @@ export const pay: Command = {
         .setRequired(true)
     ),
   async execute(interaction) {
-    const fromUserId = interaction.user.id;
-    const toUser = interaction.options.getUser("user", true);
-    const toUserId = toUser.id;
+    const fromUser = await convertDiscordUserToUser(interaction.user);
+    const toUser = await convertDiscordUserToUser(interaction.options.getUser("user", true));
     const amount = interaction.options.getInteger("amount", true);
 
-    if (!toUserId || amount <= 0 || isNaN(amount)) {
-      await interaction.reply({
-        content: "Invalid user or amount. Please provide a valid user and a positive amount.",
-        flags: 64 // Ephemeral
-      });
-      return;
-    }
-
     try {
-      await transferMoney(fromUserId, toUserId, amount);
+      await transferMoney(fromUser, toUser, amount);
       await interaction.reply({
-        content: `✅ Successfully sent **${amount}** fops 🦊 to <@${toUserId}>!`,
+        content: `✅ Successfully sent **${amount}** fops 🦊 to <@${toUser.id}>!`,
       });
     } catch (error) {
       console.error("[ECO] Error during money transfer:", error);

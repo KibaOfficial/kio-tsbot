@@ -3,18 +3,21 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
-import { loadData } from "./data";
+import { ensureInGuild } from "../../utils/utils";
+import { AppDataSource } from "../../utils/data/db";
+import { Ship } from "../../utils/data/entity/Ship";
 
 /**
- * Top command for Discord bot.
- * This command retrieves and displays the top 5 most shipped pairs in the server.
- * It fetches the pairs from the stored data, sorts them by count, and formats the output.
+ * Command to show the top 10 most shipped pairs in the server.
+ * This command fetches the ship data from the database,
+ * retrieves the pairsCount, sorts them by count, and formats the output.
  * @type {Command}
  * @property {SlashCommandBuilder} data - The command data for the top command.
- * @property {function} execute - The function that executes the command when invoked.
+ * @property {Function} execute - The function to execute when the command is called.
  * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
+ * @throws {Error} - If the command is executed outside of a guild or if no pairs are found.
  */
 export const top: Command = {
   data: new SlashCommandBuilder()
@@ -22,32 +25,39 @@ export const top: Command = {
     .setDescription("Shows the top 10 most shipped pairs in the server"),
   
   async execute(interaction) {
-    if (!interaction.guild) {
-      await interaction.reply("This command can only be used in a server.");
+    if (!(await ensureInGuild(interaction))) return;
+
+    // Fetch the top pairs from the Database
+    const ship = await AppDataSource.getRepository(Ship).findOne({
+      where: { id: interaction.guild!.id },
+    });
+    if (!ship || !ship.pairsCount) {
+      await interaction.reply({
+        content: "No pairs found in the top list.",
+        ephemeral: true
+      });
       return;
     }
-
-    const data = await loadData();
-    const pairEntries = Object.entries(data.pairsCount);
-
-    if (pairEntries.length === 0) {
-      await interaction.reply("No pairs have been shipped yet.");
-      return;
-    }
-
-    pairEntries.sort((a, b) => b[1] - a[1]);
-    const topPairs = pairEntries.slice(0, 5);
-
+    // Convert pairsCount to an array of [pairKey, count] tuples
+    const pairsArray = Object.entries(ship.pairsCount)
+      .map(([pairKey, count]) => ({ pairKey, count }))
+      .sort((a, b) => b.count - a.count); // Sort by count descending
+    // Get the top 10 pairs
+    const topPairs = pairsArray.slice(0, 10);
     if (topPairs.length === 0) {
-      await interaction.reply("No pairs found in the top list.");
+      await interaction.reply({
+        content: "No pairs found in the top list.",
+        ephemeral: true
+      });
       return;
     }
 
-    let msg = "**Top 5 Shipped Pairs:**\n\n";
-    for (const [pairKey, count] of topPairs) {
+    // Format the message with the top pairs
+    let msg = "**Top 10 Shipped Pairs:**\n\n";
+    for (const { pairKey, count } of topPairs) {
       const [id1, id2] = pairKey.split('-');
-      const member1 = await interaction.guild.members.fetch(id1).catch(() => null);
-      const member2 = await interaction.guild.members.fetch(id2).catch(() => null);
+      const member1 = await interaction.guild!.members.fetch(id1).catch(() => null);
+      const member2 = await interaction.guild!.members.fetch(id2).catch(() => null);
 
       if (member1 && member2) {
         msg += `<@${member1.id}> ❤️ <@${member2.id}> - **${count}**\n`;
@@ -55,7 +65,12 @@ export const top: Command = {
         msg += `Unknown members in pair: <@${id1}> ❤️ <@${id2}> - **${count}**\n`;
       }
     }
-    
-    await interaction.reply(msg || "No pairs found in the top list.");
+
+    // Reply with the formatted message
+    const embed = new EmbedBuilder()
+      .setTitle("Top 10 Shipped Pairs")
+      .setDescription(msg)
+      .setColor(0x00ff00);
+    await interaction.reply({ embeds: [embed], flags: 64 }); // Ephemeral
   }
 }

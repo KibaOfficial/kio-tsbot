@@ -183,6 +183,33 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.2.0 (29 May 2025)
+- 🚀 **Major Refactor & API Consistency:**
+  - Unified all economy functions: `addItem`, `removeItem`, and related methods now consistently use `userId: string` as a parameter.
+  - Consistent behavior: User and inventory are now always auto-initialized if they do not exist.
+  - Improved error handling and logging for all economy and shop operations.
+- 🛒 **Inventory & Shop System:**
+  - Completely reworked inventory logic for items and quantities (stacking, quantity, defensive checks).
+  - `/buy` and `/item` commands now use the new, robust item and inventory logic.
+  - Items are decremented or removed correctly when used.
+  - Shop and inventory commands display item emojis, names, and descriptions.
+- 💰 **Economy Core:**
+  - All economy commands now auto-initialize user data if the user does not exist.
+  - Improved typing for User, Inventory, and Items.
+  - Consistent and safe database operations for all economy and shop commands.
+- ❤️ **Shipping System:**
+  - `/mystats` and `/top` now show shipping statistics and leaderboards with robust fallback for deleted users.
+  - Improved display and error handling for missing shipping data.
+- 🧹 **Code Cleanup:**
+  - Major refactor for better readability, maintainability, and DRY principle.
+  - Utility functions for user initialization and permission checks are now centralized.
+- 🧑‍💻 **Developer Experience:**
+  - All economy and shop commands are now consistent and easy to extend.
+  - Improved JSDoc comments and types for all core functions.
+
+**Note:**
+> This version contains breaking changes for anyone directly accessing the economy or inventory APIs. Please check your own extensions and integrations!
+
 ### v0.1.15 (29 May 2025)
 - 🛒 Economy system: Added support for inventory item effects and persistent item usage.
 - 🏆 New "multiplier" item: Users can now use a "multiplier" item to double their slot machine winnings for 3 hours.

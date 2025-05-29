@@ -6,18 +6,18 @@
 import { SlashCommandBuilder } from "discord.js";
 import { playSlots } from "./games/slots";
 import { Command } from "../../interfaces/types";
-import { getDataAndUser } from "./data";
+import { AppDataSource } from "../../utils/data/db";
+import { User } from "../../utils/data/entity/User";
 
 /**
- * Play command for Discord bot.
- * This command allows users to play a game to earn fops 🦊
+ * Command to play a game in the economy system.
+ * This command allows users to play a game and earn fops 🦊
  * It currently supports a slot machine game.
- * Users can choose a game and specify a bet amount.
  * @type {Command}
- * @property {SlashCommandBuilder} data - The command data for the playgame command.
- * @property {function} execute - The function that executes the command when invoked.
- * @returns {Promise<void>} - A promise that resolves when the command execution is complete.
- * @throws - If the game is unknown or if the bet amount is invalid.
+ * @property {SlashCommandBuilder} data - The command data for the slash command.
+ * @property {Function} execute - The function to execute when the command is invoked.
+ * @returns {Promise<void>} - A promise that resolves when the command is executed.
+ * @throws {Error} - If the user does not have an active multiplier or if the game is unknown.
  */
 export const playgame: Command = {
   data: new SlashCommandBuilder()
@@ -42,21 +42,23 @@ export const playgame: Command = {
     const game = interaction.options.getString("game", true);
     const bet = interaction.options.getInteger("bet", true);
 
-    // get user data
-    const userId = interaction.user.id;
-    const { data, userData } = await getDataAndUser(userId);
-    if (!data || !userData) {
-      await interaction.reply({
-        content: "User data not found. Please try again later.",
-        flags: 64 // Ephemeral message
-      });
-      return;
+    // get user from DB
+    let user = await AppDataSource.getRepository(User).findOne({
+      where: { id: interaction.user.id }
+    });
+    if (!user) {
+      // create user
+      const newUser = new User(interaction.user.id, 0, undefined, undefined, undefined);
+      await AppDataSource.getRepository(User).save(newUser);
+      console.log(`[ECO] Created new user with ID: ${interaction.user.id}`);
+      user = newUser;
     }
+
 
     // check if user has an active multiplier
     const currentTime = Date.now();
     let activeMultiplier = false;
-    if (userData.multiplierExpiresAt && userData.multiplierExpiresAt > currentTime) {
+    if (user.multiplierExpiresAt && user.multiplierExpiresAt > currentTime) {
       activeMultiplier = true;
     }
 

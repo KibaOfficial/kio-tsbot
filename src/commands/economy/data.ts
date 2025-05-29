@@ -3,297 +3,216 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { promises as fs } from 'fs';
-import { join } from "path";
-import { EconomyData, UserEconomyData, defaultUserData } from "../../interfaces/econemyData";
-import { Item } from '../../interfaces/econemyData';
-
-const dataFile = join(__dirname, 'economyData.json');
-
-const defaultEconomyData: EconomyData = {
-  users: {}
-};
-
-async function fileExists(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Loads the economy data from the specified JSON file.
- * If the file does not exist, it creates a new one with default data.
- * If the file is invalid, it replaces it with a new one containing default data.
- * @returns {Promise<EconomyData>} - A promise that resolves to the loaded economy data.
- * @throws - If there is an error reading or writing the file, it logs a warning and returns default data.
- */
-export async function loadData(): Promise<EconomyData> {
-  if (!(await fileExists(dataFile))) {
-    await fs.writeFile(dataFile, JSON.stringify(defaultEconomyData, null, 2), 'utf-8');
-    console.warn('[ECO] Economy data file not found. Created new one.');
-    return { ...defaultEconomyData };
-  }
-  try {
-    const raw = await fs.readFile(dataFile, 'utf-8');
-    console.log('[ECO] Economy data loaded successfully.');
-    return JSON.parse(raw) as EconomyData;
-  } catch (error) {
-    console.warn('[ECO] Economy data file invalid. Replacing with new one...');
-    await fs.writeFile(dataFile, JSON.stringify(defaultEconomyData, null, 2), 'utf-8');
-    return { ...defaultEconomyData };
-  }
-}
-
-/**
- * Saves the economy data to the specified JSON file.
- * If there is an error writing the file, it logs an error message to the console.
- * @param data - The economy data to save.
- * @returns {Promise<void>} - A promise that resolves when the data is saved.
- * @throws - If there is an error writing the file, it logs an error message to the console.
- */
-export async function saveData(data: EconomyData): Promise<void> {
-  try {
-    await fs.writeFile(dataFile, JSON.stringify(data, null, 2), 'utf-8');
-    console.log('[ECO] Economy data saved successfully.');
-  } catch (error) {
-    console.error('[ECO] Error saving economy data:', error);
-  }
-}
-
-/**
- * Retrieves the economy data for a specific user.
- * If the user does not exist, it creates a new user with default data.
- * This function ensures that the user data is always available.
- * @param {string} userId - The ID of the user whose data is to be retrieved.
- * @returns {Promise<UserEconomyData>} - A promise that resolves to the user's economy data.
- * @throws - If there is an error loading or saving the data, it logs an error message and returns default user data.
- */
-export async function getUserData(userId: string): Promise<UserEconomyData> {
-  const data = await loadData();
-  if (!data.users[userId]) {
-    data.users[userId] = { ...defaultUserData };
-    await saveData(data);
-  }
-  return data.users[userId];
-}
-
-/**
- * Retrieves the economy data and user data for a specific user.
- * If the user does not exist, it creates a new user with default data.
- * This function ensures that both the economy data and user data are always available.
- * @param {string} userId - The ID of the user whose data is to be retrieved.
- * @returns {Promise<{ data: EconomyData, userData: UserEconomyData }>} - A promise that resolves to an object containing the economy data and the user's economy data.
- * @throws - If there is an error loading or saving the data, it logs an error message and returns default user data.
- */
-export async function getDataAndUser(userId: string): Promise<{ data: EconomyData, userData: UserEconomyData }> {
-  const data = await loadData();
-  if (!data.users[userId]) {
-    data.users[userId] = { ...defaultUserData };
-    await saveData(data);
-  }
-  return { data, userData: data.users[userId] };
-}
-
-/**
- * Retrieves the balance of a specific user.
- * If the user does not exist, it creates a new user with default data.
- * This function ensures that the user's balance is always available.
- * @param {string} userId - The ID of the user whose balance is to be retrieved.
- * @returns {Promise<number>} - A promise that resolves to the user's balance.
- * @throws - If there is an error loading or saving the data, it logs an error message and returns 0 as the balance.
- */
-export async function getBalance(userId: string): Promise<number> {
-  const data = await loadData();
-  if (!data.users[userId]) {
-    data.users[userId] = { ...defaultUserData };
-    await saveData(data);
-  }
-  return data.users[userId].balance;
-}
+import { ChatInputCommandInteraction } from "discord.js";
+import { AppDataSource } from "../../utils/data/db";
+import { Item } from "../../utils/data/entity/Item";
+import { Shop } from "../../utils/data/entity/Shop";
+import { User} from "../../utils/data/entity/User";
 
 /**
  * Transfers money from one user to another.
- * This function checks if the users exist, if the amount is valid, and if the sender has sufficient balance.
- * It updates both users' balances accordingly.
- * @param {string} fromId - The ID of the user sending the money.
- * @param {string} toId - The ID of the user receiving the money.
+ * This function checks if the users exist, if the amount is valid,
+ * and updates the balances of both users accordingly.
+ * @param {User} fromUser - The user from whom money will be transferred.
+ * @param {User} toUser - The user to whom money will be transferred.
  * @param {number} amount - The amount of money to transfer.
  * @returns {Promise<void>} - A promise that resolves when the transfer is complete.
- * @throws - If the transfer is invalid (e.g., transferring to oneself, insufficient balance, or invalid amount).
+ * @throws - If the transfer is invalid (e.g., transferring to oneself, insufficient balance, or invalid amount). 
  */
-export async function transferMoney(fromId: string, toId: string, amount: number): Promise<void> {
-  if (fromId === toId) {
+export async function transferMoney(fromUser: User, toUser: User, amount: number): Promise<void> {
+  if (fromUser === toUser) {
     throw new Error("Cannot transfer money to yourself.");
   }
   if (amount <= 0) {
     throw new Error("Amount must be greater than 0.");
   }
 
-  const data = await loadData();
-  if (!data.users[fromId]) data.users[fromId] = { ...defaultUserData };
-  if (!data.users[toId]) data.users[toId] = { ...defaultUserData };
-
-  const fromUser = data.users[fromId];
-  const toUser = data.users[toId];
-
   if (fromUser.balance < amount) {
-    throw new Error("Insufficient balance for transfer.");
+    throw new Error("Insufficient balance to transfer money.");
   }
 
   fromUser.balance -= amount;
   toUser.balance += amount;
-
-  await saveData(data);
-  console.log(`[ECO] Transferred ${amount} from ${fromId} to ${toId}.`);
+  const userRepo = AppDataSource.getRepository(User);
+  await userRepo.save(fromUser);
+  await userRepo.save(toUser);
+  console.log(`[ECO] Transferred ${amount} from ${fromUser.id} to ${toUser.id}.`);
 }
 
 /**
  * Adds money to a user's balance.
- * This function checks if the user exists, if the amount is valid, and updates the user's balance accordingly.
- * @param {string} userId - The ID of the user to whom money will be added.
+ * This function checks if the user exists, if the amount is valid,
+ * and updates the user's balance accordingly.
+ * @param {User} user - The user to whom money will be added.
  * @param {number} amount - The amount of money to add to the user's balance.
  * @returns {Promise<void>} - A promise that resolves when the money is added.
  * @throws - If the amount is invalid (e.g., less than or equal to 0).
+ * @throws - If the user does not exist, it will create a new user with default data.
  */
-export async function addMoney(userId: string, amount: number): Promise<void> {
+export async function addMoney(user: User, amount: number): Promise<void> {
+
   if (amount <= 0) {
     throw new Error("Amount must be greater than 0.");
   }
 
-  const data = await loadData();
-  if (!data.users[userId]) {
-    data.users[userId] = { ...defaultUserData };
+  const userRepo = AppDataSource.getRepository(User);
+  let userData = await userRepo.findOne({ where: { id: user.id } });
+  if (!userData) {
+    // If user does not exist, create a new user with default data
+    userData = new User(user.id, 0, undefined, undefined, undefined);
   }
-  data.users[userId].balance += amount;
-
-  await saveData(data);
-  console.log(`[ECO] Added ${amount} to ${userId}'s balance.`); 
+  userData.balance += amount;
+  await userRepo.save(userData);
+  
+  console.log(`[ECO] Added ${amount} to ${user.id}'s balance.`); 
 }
 
 /**
  * Removes money from a user's balance.
- * This function checks if the user exists, if the amount is valid, and if the user has sufficient balance.
- * It updates the user's balance accordingly.
- * @param {string} userId - The ID of the user from whose balance money will be removed.
+ * This function checks if the user exists, if the amount is valid,
+ * and updates the user's balance accordingly.
+ * @param {User} user - The user from whose balance money will be removed.
  * @param {number} amount - The amount of money to remove from the user's balance.
  * @returns {Promise<void>} - A promise that resolves when the money is removed.
- * @throws - If the amount is invalid (e.g., less than or equal to 0) or if there is insufficient balance.
+ * @throws - If the amount is invalid (e.g., less than or equal to 0).
+ * @throws - If the user does not exist, it will create a new user with default data.
  */
-export async function removeMoney(userId: string, amount: number): Promise<void> {
+export async function removeMoney(user: User, amount: number): Promise<void> {
   if (amount <= 0) {
     throw new Error("Amount must be greater than 0.");
   }
 
-  const data = await loadData();
-  if (!data.users[userId]) {
-    data.users[userId] = { ...defaultUserData };
+  const userRepo = AppDataSource.getRepository(User);
+  let userData = await userRepo.findOne({ where: { id: user.id } });
+  if (!userData) {
+    // If user does not exist, create a new user with default data
+    userData = new User(user.id, 0, undefined, undefined, undefined);
   }
-  if (data.users[userId].balance < amount) {
+  if (userData.balance < amount) {
     throw new Error("Insufficient balance to remove money.");
   }
-  data.users[userId].balance -= amount;
-
-  await saveData(data);
-  console.log(`[ECO] Removed ${amount} from ${userId}'s balance.`);
-}
-
-/**
- * Checks if a user has a specific item in their inventory.
- * This function loads the economy data, ensures the user exists, and checks if the item is present in their inventory.
- * It returns true if the item is found, otherwise false.
- * @param userId - The ID of the user to check for the item.
- * @param itemName - The name of the item to check for in the user's inventory.
- * @returns {Promise<boolean>} - A promise that resolves to true if the user has the item, otherwise false.
- * @throws - If there is an error loading or saving the data, it logs an error message and returns false.
- */
-export async function checkForItem(userId: string, itemName: string): Promise<boolean> {
-  // load the economy data
-  const data = await loadData();
-
-  // ensure the user exists in the data if not, create a new user with default data
-  if (!data.users[userId]) {
-    data.users[userId] = { ...defaultUserData };
-    await saveData(data);
-  }
-  
-  // check if the user has the item in their inventory
-  const userData = data.users[userId];
-  const hasItem = userData.inventory.some(item => item.itemType === itemName || item.name.toLowerCase() === itemName.toLowerCase());
-
-  if (hasItem) {
-    console.log(`[ECO] User ${userId} has the item: ${itemName}.`);
-  } else {
-    console.log(`[ECO] User ${userId} does not have the item: ${itemName}.`);
-  }
-  return hasItem;
-}
-
-/**
- * Adds an item to a user's inventory.
- * This function loads the economy data, ensures the user exists, and adds the specified item to their inventory.
- * It saves the updated data after adding the item.
- * @param userId - The ID of the user to whom the item will be added.
- * @param item - The item to add to the user's inventory.
- * @returns {Promise<void>} - A promise that resolves when the item is added.
- * @throws - If there is an error loading or saving the data, it logs an error message.
- */
-export async function addItem(userId: string, item: Item): Promise<void> {
-  // load the economy data and user data
-  const { data, userData } = await getDataAndUser(userId);
-
-  // ensure the user exists in the data if not, create a new user with default data
-  if (!data.users[userId]) {
-    data.users[userId] = { ...defaultUserData };
-    await saveData(data);
-  }
-  // check if the item already exists in the user's inventory
-
-  const existing = userData.inventory.find(i => i.itemType === item.itemType);
-  if (existing) {
-    existing.quantity = (existing.quantity || 1) + 1;
-  } else {
-    userData.inventory.push({ ...item, quantity: 1 });
-  }
-
-  // save the updated data
-  await saveData(data);
-  console.log(`[ECO] Added item ${item.name} to user ${userId}'s inventory.`);
+  userData.balance -= amount;
+  await userRepo.save(userData);
+  // Log the removal of money
+  console.log(`[ECO] Removed ${amount} from ${user.id}'s balance.`);
 }
 
 /**
  * Removes an item from a user's inventory.
- * This function loads the economy data, ensures the user exists, and removes the specified item from their inventory.
- * It saves the updated data after removing the item.
- * @param userId - The ID of the user from whose inventory the item will be removed.
- * @param itemName - The name of the item to remove from the user's inventory.
- * @returns {Promise<void>} - A promise that resolves when the item is removed.
- * @throws - If there is an error loading or saving the data, it logs an error message.
+ * This function checks if the user exists, if the inventory is available,
+ * and if the item exists in the inventory.
+ * If the item exists, it decrements the quantity or removes the item if the quantity is 1.
+ * @param {string} userId - The ID of the user whose inventory will be modified.
+ * @param {string} itemName - The name or itemType of the item to be removed.
+ * @return {Promise<void>} - A promise that resolves when the item is removed.
+ * @throws - If the user does not exist, it will create a new user with default data.
+ * @throws - If the inventory is empty or the item is not found in the inventory.
  */
 export async function removeItem(userId: string, itemName: string): Promise<void> {
-  // load the economy data
-  const data = await loadData();
+  const userRepo = AppDataSource.getRepository(User);
+  let userData = await userRepo.findOne({ where: { id: userId } });
+  if (!userData) {
+    // User initialisieren, falls nicht vorhanden
+    userData = new User(userId, 0, undefined, [], undefined);
+    await userRepo.save(userData);
+    // Da Inventory leer ist, kann das Item nicht entfernt werden
+    throw new Error("User inventory is empty.");
+  }
+  if (!userData.inventory || !Array.isArray(userData.inventory)) {
+    userData.inventory = [];
+    await userRepo.save(userData);
+    throw new Error("User inventory is not available.");
+  }
+  // Find item by itemType or name (case-insensitive)
+  const itemIndex = userData.inventory.findIndex(item =>
+    item.itemType.toLowerCase() === itemName.toLowerCase() ||
+    item.name.toLowerCase() === itemName.toLowerCase()
+  );
+  if (itemIndex === -1) {
+    // Debug: print inventory for troubleshooting
+    console.error("[ECO] Inventory on removeItem fail:", JSON.stringify(userData.inventory, null, 2));
+    throw new Error(`Item \"${itemName}\" not found in user's inventory.`);
+  }
+  // Decrement quantity or remove item
+  if (userData.inventory[itemIndex].quantity > 1) {
+    userData.inventory[itemIndex].quantity--;
+  } else {
+    userData.inventory.splice(itemIndex, 1);
+  }
+  await userRepo.save(userData);
+  console.log(`[ECO] Removed item \"${itemName}\" from ${userId}'s inventory.`);
+}
 
-  // ensure the user exists in the data if not, create a new user with default data
-  if (!data.users[userId]) {
-    data.users[userId] = { ...defaultUserData };
-    await saveData(data);
+/**
+ * Checks if a user has a specific item in their inventory.
+ * This function retrieves the user's inventory and checks if the specified item exists.
+ * @param {User} user - The user whose inventory will be checked.
+ * @param {string} item - The name or itemType of the item to check for.
+ * @return {Promise<boolean>} - A promise that resolves to true if the item exists in the inventory, false otherwise.
+ * @throws - If the user does not exist or if the inventory is not available.
+ */
+export async function checkForItem(user: User, item: string): Promise<boolean> {
+  const userRepo = AppDataSource.getRepository(User);
+  const userData = await userRepo.findOne({ where: { id: user.id } });
+  
+  if (!userData || !userData.inventory || !Array.isArray(userData.inventory)) {
+    return false;
   }
 
-  // decrement or remove the item from the user's inventory
-  const userData = data.users[userId];
-  const idx = userData.inventory.findIndex(item => item.itemType === itemName || item.name.toLowerCase() === itemName.toLowerCase());
-  if (idx !== -1) {
-    if (userData.inventory[idx].quantity && userData.inventory[idx].quantity! > 1) {
-      userData.inventory[idx].quantity!--;
-    } else {
-      userData.inventory.splice(idx, 1);
+  return userData.inventory.some(invItem => invItem.name === item || invItem.itemType === item);
+}
+
+/**
+ * Adds an item to a user's inventory.
+ * This function checks if the user exists, initializes the inventory if necessary,
+ * and adds the item to the inventory.
+ * If the item already exists, it increments the quantity.
+ * @param {string} userId - The ID of the user whose inventory will be modified.
+ * @param {Item} item - The item to be added to the user's inventory.
+ * @return {Promise<boolean>} - A promise that resolves to true if the item was added successfully.
+ * @throws - If the user does not exist, it will create a new user with default data.
+ * @throws - If the item is invalid or if the inventory is not available.
+ */
+export async function addItem(userId: string, item: Item): Promise<boolean> {
+  const userRepo = AppDataSource.getRepository(User);
+  let userData = await userRepo.findOne({ where: { id: userId } });
+
+  if (!userData) {
+    // User initialisieren, falls nicht vorhanden
+    userData = new User(userId, 0, undefined, [], undefined);
+    await userRepo.save(userData);
+    console.log(`[ECO] Created new user ${userData.id} with default data.`);
+  }
+
+  // Defensive: ensure inventory is always an array
+  if (!Array.isArray(userData.inventory)) {
+    userData.inventory = [];
+  }
+
+  // Check if the item already exists in the inventory by itemType
+  const existingItemIndex = userData.inventory.findIndex(invItem => invItem.itemType === item.itemType);
+  if (existingItemIndex !== -1) {
+    // If the item already exists, increment its quantity
+    if (typeof userData.inventory[existingItemIndex].quantity !== 'number') {
+      userData.inventory[existingItemIndex].quantity = 1;
     }
+    userData.inventory[existingItemIndex].quantity += 1;
+    console.log(`[ECO] Incremented quantity of item \"${item.name}\" for ${userData.id}. New quantity: ${userData.inventory[existingItemIndex].quantity}`);
+  } else {
+    // If the item does not exist, add it to the inventory (clone the item, set quantity = 1)
+    const newItem = {
+      name: item.name,
+      desc: item.desc,
+      price: item.price,
+      itemType: item.itemType,
+      emoji: item.emoji,
+      quantity: 1
+    };
+    userData.inventory.push(newItem);
+    console.log(`[ECO] Added new item \"${item.name}\" to ${userData.id}'s inventory.`);
   }
 
-  // save the updated data
-  await saveData(data);
-  console.log(`[ECO] Removed item ${itemName} from user ${userId}'s inventory.`);
+  await userRepo.save(userData);
+  console.log(`[ECO] Inventory for ${userData.id} after add:`, JSON.stringify(userData.inventory));
+  return true;
 }

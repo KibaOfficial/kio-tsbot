@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { ChatInputCommandInteraction, CommandInteraction, PermissionsBitField, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder } from "discord.js";
+import { ChatInputCommandInteraction,  PermissionsBitField, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder } from "discord.js";
 
 /**
  * Command interface for defining Discord bot commands.

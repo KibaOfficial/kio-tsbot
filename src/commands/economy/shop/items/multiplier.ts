@@ -4,7 +4,8 @@
 // https://opensource.org/licenses/MIT
 
 import { ChatInputCommandInteraction } from "discord.js";
-import { checkForItem, getDataAndUser, removeItem, saveData } from "../../data";
+import { AppDataSource } from "../../../../utils/data/db";
+import { User } from "../../../../utils/data/entity/User";
 
 /**
  * useMultiplier function for applying a multiplier to the user's economy data.
@@ -16,23 +17,20 @@ import { checkForItem, getDataAndUser, removeItem, saveData } from "../../data";
 export async function useMultiplier(interaction: ChatInputCommandInteraction): Promise<void> {
 
   // Get: User Data
-  const { data, userData, } = await getDataAndUser(interaction.user.id);
-
-  // Check: User has multiplier item
-  if (!(await checkForItem(interaction.user.id, "multiplier"))) {
-    await interaction.reply({
-      content: "You don't have a multiplier item in your inventory.",
-      flags: 64 // Ephemeral
-    });
-    return;
+  const userRepo = AppDataSource.getRepository(User);
+  let user = await userRepo.findOne({ where: { id: interaction.user.id } });
+  if (!user) {
+    // If user does not exist, create a new user with default data
+    user = new User(interaction.user.id, 0, undefined, [], undefined);
+    await userRepo.save(user);
   }
 
   // Get: Current Time
   const currentTime = Date.now();
 
   // Check: User already has a multiplier active
-  if (userData.multiplierExpiresAt && userData.multiplierExpiresAt > currentTime) {
-    const remaining = Math.ceil((userData.multiplierExpiresAt - currentTime) / 1000);
+  if (user.multiplierExpiresAt && user.multiplierExpiresAt > currentTime) {
+    const remaining = Math.ceil((user.multiplierExpiresAt - currentTime) / 1000);
     await interaction.reply({
       content: `You already have a multiplier active! It will expire in ${remaining} seconds.`,
       flags: 64 // Ephemeral
@@ -40,17 +38,12 @@ export async function useMultiplier(interaction: ChatInputCommandInteraction): P
     return;
   }
 
-  // Remove: Multiplier item from user's inventory
-  await removeItem(interaction.user.id, "multiplier")
-
   // Update: User Data multiplierExpiresAt with 3 hours from now
-  userData.multiplierExpiresAt = currentTime + 3 * 60 * 60 * 1000; // 3 hours in milliseconds
-
-  // Push: Updated userData into data.users
-  data.users[interaction.user.id] = userData;
-
-  // Save: Data
-  await saveData(data);
+  user.multiplierExpiresAt = currentTime + 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+  await userRepo.save(user);
+  // Log: Multiplier usage
+  console.log(`[ECO] Multiplier used by ${interaction.user.id}. Multiplier expires at ${new Date(user.multiplierExpiresAt).toISOString()}`);
+  
   await interaction.reply({
     content: "✅ Multiplier applied! Your win reward will be multiplied for the next 3 hours.",
     flags: 64 // Ephemeral

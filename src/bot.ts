@@ -16,6 +16,7 @@ import * as dotenv from "dotenv";
 import { Command } from "./interfaces/types";
 import { join } from "path";
 import { loadCommands } from "./utils/loadCommands";
+import { initDB } from "./utils/data/db";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -63,6 +64,7 @@ const commands = new Collection<string, Command>();
  * Also sets up the event listeners for the bot.
  */
 (async () => {
+  await initDB();
   // Path to the commands directory
   const commandPath = join(__dirname, 'commands');
   // Load all command modules from the directory
