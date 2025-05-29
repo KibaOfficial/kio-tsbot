@@ -8,7 +8,7 @@ import { SlashCommandBuilder } from "discord.js";
 
 import { Command } from "../../../interfaces/types";
 import { loadJson } from "../../../utils/jsonUtils";
-import { getDataAndUser, removeMoney, saveData } from "../data";
+import { getDataAndUser, removeMoney, addItem } from "../data";
 import { Item, ShopItemsFile } from "../../../interfaces/econemyData";
 
 const itemsPath = path.join(__dirname, "items.json");
@@ -78,11 +78,9 @@ export const buy: Command = {
 
     try {
       await removeMoney(userId, itemObj.price);
-      if (!userData.inventory) userData.inventory = [];
-      userData.inventory.push({ ...itemObj });
-      await saveData(data);
+      await addItem(userId, itemObj); // Use addItem to handle quantity
       await interaction.reply({
-        content: `✅ You have successfully bought \"${itemObj.name}\" for **${itemObj.price}** fops 🦊!`,
+        content: `✅ You have successfully bought "${itemObj.name}" for **${itemObj.price}** fops 🦊!`,
       });
     } catch (error) {
       console.error("[ECO] Error while processing buy command:", error);

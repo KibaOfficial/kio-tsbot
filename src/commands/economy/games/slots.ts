@@ -36,7 +36,7 @@ function getRandomEmoji() {
  * @throws {Error} If the user does not have enough money to play.
  * @returns {Promise<void>} A promise that resolves when the game is played.
  */
-export async function playSlots(interaction: ChatInputCommandInteraction, bet: number) {
+export async function playSlots(interaction: ChatInputCommandInteraction, bet: number, activeMultiplier: boolean = false): Promise<void> {
   const userId = interaction.user.id;
 
   try {
@@ -67,9 +67,11 @@ export async function playSlots(interaction: ChatInputCommandInteraction, bet: n
     const match = slotEmojis.find((e) => e.emoji === first);
     const multiplier = match?.multiplier ?? 1;
     reward = Math.floor(bet * multiplier);
-    await addMoney(userId, reward);
-    console.log(`[SLOTS] User ${userId} won ${reward} fops 🦊!`);
+    // add x2 if activeMultiplier
+    await addMoney(userId, reward * (activeMultiplier ? 2 : 1));
+    console.log(`[SLOTS] User ${userId} won ${reward * (activeMultiplier ? 2 : 1)} fops 🦊 with multiplier ${activeMultiplier ? "active" : "inactive"}!`);
   } else {
+    console.log(`[ECO]  `)
     console.log(`[SLOTS] User ${userId} lost ${bet} fops 🦊.`);
   }
 

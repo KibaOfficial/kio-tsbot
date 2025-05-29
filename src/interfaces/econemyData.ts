@@ -8,11 +8,9 @@
  * It includes user data, shop items, and their prices and descriptions.
  * @interface EconomyData
  * @property {Record<string, UserEconomyData>} users - A record of user IDs and their economy data.
- * @property {Record<string, { price: number; desc: string }>} shop - A record of shop items with their prices and descriptions.
  */
 export interface EconomyData {
   users: Record<string, UserEconomyData>;
-  shop: Record<string, { price: number; desc: string }>;
 }
 
 /**
@@ -27,6 +25,7 @@ export interface UserEconomyData {
   balance: number;
   lastDaily?: number;
   inventory: Item[];
+  multiplierExpiresAt?: number;
 }
 
 /**

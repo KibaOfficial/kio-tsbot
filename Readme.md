@@ -183,6 +183,18 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.1.15 (29 May 2025)
+- 🛒 Economy system: Added support for inventory item effects and persistent item usage.
+- 🏆 New "multiplier" item: Users can now use a "multiplier" item to double their slot machine winnings for 3 hours.
+- 🎰 Slots game: Integrated multiplier logic so that active multipliers double slot rewards.
+- 🛠️ Refactored `/item` command to use persistent inventory and item effect logic.
+- 🧩 Improved inventory management: Added utility functions for adding, removing, and checking items in user inventories.
+- 🧑‍💻 Type safety: Updated types and interfaces for inventory and item handling.
+- 🛒 `/buy` command now uses quantity-based inventory logic for stackable items.
+- 🧰 `/item` command now decrements item quantity or removes the item if last one is used.
+- 📦 `/inventory` command displays item quantities.
+- 🏪 `/shop` and shop data now support new item structure and display improvements.
+
 ### v0.1.14 (29 May 2025)
 - First of all, i did a loooot of refactoring and code cleanup to try to keep it DRY.
   and also i just wanted to just say here 

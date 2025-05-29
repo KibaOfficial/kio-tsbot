@@ -15,7 +15,6 @@ import { ChatInputCommandInteraction, CommandInteraction, PermissionsBitField, S
 export interface Command {
   data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
   execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
-  // TODO: switch all commands to the ChatInputCommandInteraction type
 }
 
 /**

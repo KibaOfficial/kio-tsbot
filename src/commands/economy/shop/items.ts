@@ -5,12 +5,13 @@
 import { SlashCommandBuilder, MessageFlags } from "discord.js";
 import { Command } from "../../../interfaces/types";
 import path from "path";
-import { loadJson, saveJson } from "../../../utils/jsonUtils";
+import { loadJson } from "../../../utils/jsonUtils";
 import { useNicknameChange } from "./items/nickname_change";
 import { Item, ShopItemsFile } from "../../../interfaces/econemyData";
+import { useMultiplier } from "./items/multiplier";
+import { getDataAndUser, removeItem } from "../data";
 
 const itemsPath = path.join(__dirname, "items.json");
-const economyPath = path.join(__dirname, "../economyData.json");
 
 /**
  * Command to use an item from the user's inventory.
@@ -36,76 +37,76 @@ export const item: Command = {
     const itemName = interaction.options.getString("item", true);
     const userId = interaction.user.id;
 
-    // load items and economy data
+    // load shop items data
     const itemsData: ShopItemsFile = loadJson(itemsPath);
-    const allUserData = loadJson(economyPath);
-
-    // Ensure users property exists
-    if (!allUserData.users) allUserData.users = {};
-    const userData = allUserData.users[userId];
-
-    if (!userData || !userData.inventory || !Array.isArray(userData.inventory)) {
+    if (!itemsData["shop-items"] || !Array.isArray(itemsData["shop-items"].items)) {
       await interaction.reply({
-        content: "You have no items in your inventory.",
+        content: "Shop items data is not available or corrupted.",
         flags: MessageFlags.Ephemeral
       });
       return;
     }
 
-    // find item by name or itemType
+    // Find item by name or itemType (fallback)
+    // This allows users to use items by their name or itemType
     let itemObj = itemsData["shop-items"].items.find((i: Item) => i.name.toLowerCase() === itemName.toLowerCase());
     if (!itemObj) {
-      // Try to find by type as fallback (for users entering the type directly)
       itemObj = itemsData["shop-items"].items.find((i: Item) => i.itemType.toLowerCase() === itemName.toLowerCase());
     }
     if (!itemObj) {
       await interaction.reply({
-        content: `Item "${itemName}" not found in the shop.`,
+        content: ` Item "${itemName}" not found in the shop.`,
         flags: MessageFlags.Ephemeral
       });
       return;
     }
 
-    // check if user has the item in their inventory
-    const itemIdx = userData.inventory.findIndex((invItem: Item) => invItem.itemType === itemObj.itemType);
-    if (itemIdx === -1) {
+    // Check if the user has the item in their inventory
+    const { userData } = await getDataAndUser(userId);
+    if (!userData || !Array.isArray(userData.inventory) || userData.inventory.length === 0) {
       await interaction.reply({
-        content: `You do not have the item "${itemName}" in your inventory.`,
+        content: "You don't have any items in your inventory.",
         flags: MessageFlags.Ephemeral
       });
       return;
     }
 
-    // remove item from inventory
-    userData.inventory.splice(itemIdx, 1);
-    allUserData.users[userId] = userData;
-    saveJson(economyPath, allUserData);
+    // Check if the user has the item in their inventory
+    const hasItem = userData.inventory.some(invItem => invItem.itemType === itemObj.itemType);
+    if (!hasItem) {
+      await interaction.reply({
+        content: `You do not have the item "${itemObj.name}" in your inventory.`,
+        flags: MessageFlags.Ephemeral
+      });
+      return;
+    }
 
+    // Remove the item from the user's inventory (decrements quantity or removes if last)
+    await removeItem(userId, itemObj.itemType);
+
+    // Execute the item's effect based on its type
     switch (itemObj.itemType) {
       case "nickname_change":
         await useNicknameChange(interaction);
         break;
       case "multiplier":
-        await interaction.reply({
-          content: `You have used the item **${itemObj.name}**. (Multiplier logic coming soon.)`,
-          flags: MessageFlags.Ephemeral
-        });
+        await useMultiplier(interaction);
         break;
       case "ship_boost":
         await interaction.reply({
-          content: `You have used the item **${itemObj.name}**. (Shipping boost logic coming soon.)`,
+          content: ``,
           flags: MessageFlags.Ephemeral
         });
         break;
       case "love_letter":
         await interaction.reply({
-          content: `You have used the item **${itemObj.name}**. (Love letter logic coming soon.)`,
+          content: ``,
           flags: MessageFlags.Ephemeral
         });
         break;
       default:
         await interaction.reply({
-          content: "This item cannot currently be used.",
+          content: "",
           flags: MessageFlags.Ephemeral
         });
         break;

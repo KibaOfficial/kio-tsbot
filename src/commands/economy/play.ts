@@ -6,6 +6,7 @@
 import { SlashCommandBuilder } from "discord.js";
 import { playSlots } from "./games/slots";
 import { Command } from "../../interfaces/types";
+import { getDataAndUser } from "./data";
 
 /**
  * Play command for Discord bot.
@@ -41,9 +42,30 @@ export const playgame: Command = {
     const game = interaction.options.getString("game", true);
     const bet = interaction.options.getInteger("bet", true);
 
+    // get user data
+    const userId = interaction.user.id;
+    const { data, userData } = await getDataAndUser(userId);
+    if (!data || !userData) {
+      await interaction.reply({
+        content: "User data not found. Please try again later.",
+        flags: 64 // Ephemeral message
+      });
+      return;
+    }
+
+    // check if user has an active multiplier
+    const currentTime = Date.now();
+    let activeMultiplier = false;
+    if (userData.multiplierExpiresAt && userData.multiplierExpiresAt > currentTime) {
+      activeMultiplier = true;
+    }
+
+    // Log the multiplier status
+    console.log(`[ECO] User has ${activeMultiplier ? "an active multiplier" : "no active multiplier"}.`);
+
     switch (game) {
       case "slot":
-        await playSlots(interaction, bet);
+        await playSlots(interaction, bet, activeMultiplier);
         break;
       default:
         await interaction.reply({
