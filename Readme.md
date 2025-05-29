@@ -5,12 +5,8 @@
  https://opensource.org/licenses/MIT
 -->
 
-<div style="display: flex; justify-content: space-between; align-items: center;">
-  <h1 style="margin: 0;">Kio-TsBot 🦊🤖</h1>
-  <a href="https://wakatime.com/badge/user/8300a2f0-77bf-425e-bf9d-5ceed008c503/project/2c6fc1c6-578b-4d42-bb9b-9ca419cac302">
-    <img src="https://wakatime.com/badge/user/8300a2f0-77bf-425e-bf9d-5ceed008c503/project/2c6fc1c6-578b-4d42-bb9b-9ca419cac302.svg" alt="wakatime">
-  </a>
-</div>
+| <h1 style="margin:0;">Kio-TsBot 🦊🤖</h1> | <a href="https://wakatime.com/badge/user/8300a2f0-77bf-425e-bf9d-5ceed008c503/project/2c6fc1c6-578b-4d42-bb9b-9ca419cac302"><img src="https://wakatime.com/badge/user/8300a2f0-77bf-425e-bf9d-5ceed008c503/project/2c6fc1c6-578b-4d42-bb9b-9ca419cac302.svg" alt="wakatime"></a> |
+|:---|---:|
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/KibaOfficial/kio-tsbot/master/src/assets/kio-tsbot-logo.png" alt="Kio-TsBot Logo" width="120" />
