@@ -1,12 +1,12 @@
 {
   "name": "kio-tsbot",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A modular Discord bot written in TypeScript using discord.js",
   "main": "dist/bot.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only src/bot.ts",
+    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "cross-env NODE_ENV=production node dist/bot.js"
+    "start": "cross-env NODE_ENV=production node dist/index.js"
   },
   "keywords": [],
   "author": "KibaOfficial",

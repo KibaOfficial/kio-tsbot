@@ -187,6 +187,12 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.2.2 (31 May 2025)
+- 🏗️ **Core Refactor:** Replaced `src/bot.ts` with a new modular entrypoint (`src/index.ts`) and a dedicated `TsBot` class (`src/TsBot.ts`) for improved structure and maintainability.
+- 🗃️ **Project Structure:** All bot initialization, command/event loading, and login logic is now encapsulated in `TsBot`, making the codebase easier to extend and test.
+- 🛠️ **Scripts:** Updated `package.json` scripts to use `src/index.ts` as the main entry point for both development and production.
+- 🏷️ **Version:** Bumped version to `0.2.2` in `package.json` and `package-lock.json`.
+
 ### v0.2.1 (31 May 2025)
 - 🆕 **Reaction Roles Panel System:**
   - Introduced `/panel` command for creating, listing, adding, and deleting reaction role panels.
