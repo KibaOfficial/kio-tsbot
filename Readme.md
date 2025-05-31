@@ -75,6 +75,9 @@
 - **♻️ Hot-reloading:**  
   Development mode with TypeScript and hot-reloading for fast iteration.
 
+- **🦊 Reaction Roles Panel System:**  
+  Create, manage, and display reaction role panels with the `/panel` command. Supports multiple roles per panel, custom names, descriptions, and both unicode/custom emoji. Roles are managed via a persistent database and users can self-assign roles by reacting to panel messages.
+
 - and much much more! 🚀
 
 ---
@@ -183,6 +186,32 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 ---
 
 ## Changelog
+
+### v0.2.1 (31 May 2025)
+- 🆕 **Reaction Roles Panel System:**
+  - Introduced `/panel` command for creating, listing, adding, and deleting reaction role panels.
+  - Panels support multiple roles, custom names, descriptions, and emoji (unicode or custom).
+  - Roles are managed via a persistent database structure (`ReactionRolePanel`, `ReactionRole` entities).
+  - Users can self-assign or remove roles by reacting to panel messages.
+  - Panel and role data is stored per-guild for easy management.
+- ⚡ **Event Logic:**
+  - Added robust event handlers for `messageReactionAdd` and `messageReactionRemove` to grant/remove roles based on panel configuration.
+  - Improved logging and error handling for all reaction role events.
+  - Ensured correct emoji matching for both unicode and custom emoji, with fallback and error output for mismatches.
+- 🛠️ **Developer Experience:**
+  - Centralized utility functions for permission and guild checks.
+  - Improved type safety and JSDoc comments across new panel and event logic.
+  - Enhanced modularity for future feature expansion (panelService, entity separation).
+  - All panel and reaction role logic is fully type-safe and uses modern TypeScript best practices.
+- 🗃️ **Database & Persistence:**
+  - New entities: `ReactionRolePanel` and `ReactionRole` for persistent storage of panels and roles.
+  - Panels and roles are loaded with relations for efficient access and management.
+- 🧩 **Command Structure:**
+  - `/panel` command includes subcommands for create, add, remove, list, and delete.
+  - All subcommands include permission checks and detailed error output.
+- 🧪 **Testing & Logging:**
+  - Extensive logging for all panel and reaction role operations.
+  - Improved error output for partial message/reaction fetches and permission issues.
 
 ### v0.2.0 (29 May 2025)
 - 🚀 **Major Refactor & API Consistency:**

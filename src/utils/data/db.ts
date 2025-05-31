@@ -8,6 +8,8 @@ import { User } from "./entity/User";
 import { Shop } from "./entity/Shop";
 import { seedShop } from "./seedShop";
 import { Ship } from "./entity/Ship";
+import { ReactionRolePanel } from "./entity/ReactionRolePanel";
+import { ReactionRole } from "./entity/ReactionRole";
 
 /**
  * AppDataSource is the main database connection for the application.
@@ -19,7 +21,7 @@ export const AppDataSource = new DataSource({
   database: "./data/bot.sqlite",
   synchronize: true, // TODO: Set to false in production
   logging: false,
-  entities: [User, Shop, Ship],
+  entities: [User, Shop, Ship, ReactionRolePanel, ReactionRole],
 });
 
 /**

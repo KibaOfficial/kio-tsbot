@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { ChatInputCommandInteraction,  PermissionsBitField, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder } from "discord.js";
+import { ChatInputCommandInteraction,  PermissionsBitField, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder, ClientEvents, SlashCommandSubcommandsOnlyBuilder } from "discord.js";
 
 /**
  * Command interface for defining Discord bot commands.
@@ -13,8 +13,14 @@ import { ChatInputCommandInteraction,  PermissionsBitField, SlashCommandBuilder,
  * @property {function} execute - A function that takes a ChatInputCommandInteraction and returns a Promise<void>. This function is called when the command is executed.
  */
 export interface Command {
-  data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
+  data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
   execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+}
+
+export interface BotEvent<K extends keyof ClientEvents = keyof ClientEvents> {
+  name: K;
+  once?: boolean;
+  execute: (...args: ClientEvents[K]) => Promise<void> | void;
 }
 
 /**
@@ -24,3 +30,4 @@ export interface Command {
  * This type can be used to ensure that only valid permission flags are used in the bot's command permissions.
  */
 export type PermissionFlag = keyof typeof PermissionsBitField.Flags;
+

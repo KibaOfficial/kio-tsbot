@@ -19,9 +19,13 @@ import { Ship } from "./data/entity/Ship";
 export async function ensureInGuild(interaction: ChatInputCommandInteraction) {
   // Check if the command is used in a guild
   if (!interaction.guild) {
-    await interaction.reply({
+    // check if interaction message got already defered
+    if (!interaction.deferred && !interaction.replied) {
+      await interaction.deferReply({ ephemeral: true });
+    }
+
+    await interaction.editReply({
       content: "This command can only be used in a server.",
-      flags: 64, // Ephemeral message
     });
     return false;
   }
@@ -45,23 +49,19 @@ export async function ensurePermissions(
 
   if (!ensureInGuild(interaction)) return false;
 
-  // check if message is from a bot
-  if (interaction.user.bot) {
-    await interaction.reply({
-      content: "Bots cannot execute this command.",
-      flags: 64, // Ephemeral message
-    });
-    return false;
-  }
+  // no need to check if the user is a bot, as this is already ensured by the interactionCreate event handler
 
   // always allow the owner to execute commands
   if (interaction.user.id === interaction.guild!.ownerId) return true;
 
   const memberPerms = interaction.memberPermissions;
   if (!memberPerms || !perms.every(perm => memberPerms.has(perm))) {
-    await interaction.reply({
+    // check if interaction message got already defered
+    if (!interaction.deferred && !interaction.replied) {
+      await interaction.deferReply({ ephemeral: true });
+    }
+    await interaction.editReply({
       content: `You do not have the required permissions: ${perms.map(perm => perm.toString()).join(", ")}`,
-      flags: 64, // Ephemeral message
     });
     return false;
   }
