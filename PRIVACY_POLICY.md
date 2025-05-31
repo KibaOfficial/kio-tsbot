@@ -5,27 +5,63 @@ https://opensource.org/licenses/MIT -->
 
 # Privacy Policy
 
-_Last updated: May 27, 2025_
+_Last updated: May 31, 2025_
 
 This privacy policy applies to the Discord bot **Kio-TsBot** (including "Kio-TsBot(Dev)"), operated by **KibaOfficial**.
 
 ## What Data Is Collected?
 
 - **Discord User IDs**  
-  User IDs are stored for features such as the economy system and the shipping service.  
-  Example data:
+  The bot stores Discord user IDs to provide features such as the economy system and the shipping ("shippening") service.
+
+- **Economy Data**  
+  For each user, the following data is stored in the database:
+  - Discord User ID (as the primary key)
+  - Balance (number)
+  - Inventory (an array of item objects, each with name, description, price, type, emoji, and quantity)
+  - Last daily reward timestamp (number, optional)
+  - Multiplier expiration timestamp (number, optional)
+  Example structure:
   ```json
   {
-    "123456789012345678": {
-      "balance": 1000,
-      "inventory": ["nickname_change"],
-      "lastDaily": "2025-05-26T22:00:00Z"
+    "id": "123456789012345678",
+    "balance": 1000,
+    "inventory": [
+      {
+        "name": "Nickname Change",
+        "desc": "Allows you to change the nickname of the bot.",
+        "price": 500,
+        "itemType": "nickname_change",
+        "emoji": ":pencil:",
+        "quantity": 1
+      }
+    ],
+    "lastDaily": 1716760800000,
+    "multiplierExpiresAt": 1716847200000
+  }
+  ```
+
+- **Shipping (Shippening) Data**  
+  For each server (guild), the following is stored:
+  - Guild ID (as the primary key)
+  - Last paired user IDs (array of two Discord user IDs)
+  - Pairing counts (object mapping user ID pairs to the number of times they were matched)
+  Example structure:
+  ```json
+  {
+    "id": "987654321098765432",
+    "lastPair": ["123456789012345678", "234567890123456789"],
+    "pairsCount": {
+      "123456789012345678-234567890123456789": 3
     }
   }
-
   ```
+
+- **Shop Data**  
+  The shop contains a list of available items, each with name, description, price, type, emoji, and quantity. This data is not directly linked to personal data, but is referenced in user inventories.
+
 - **No Other Personal Data**  
-  No personal information (such as names, email addresses, or messages) is collected or stored.
+  No personal information such as real names, email addresses, or Discord messages is collected or stored. Only Discord IDs and data necessary for bot features are processed.
 
 ## How Is Your Data Used?
 
@@ -34,7 +70,7 @@ This privacy policy applies to the Discord bot **Kio-TsBot** (including "Kio-TsB
 
 ## Where Is Your Data Stored?
 
-- All data is stored on a private server located in Germany, within the European Union, inside local JSON files.
+- All data is stored on a private server located in Germany, within the European Union, inside a local SQLite database file. Some fields (like inventory or shipping pairs) are stored as JSON objects within this database.
 - The bot runs in a Docker container; no data is transmitted outside the operator's private infrastructure.
 
 ## Third Parties
