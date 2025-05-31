@@ -27,11 +27,11 @@ export const invite: Command = {
       return;
     }
 
-    const permissions = 274877906944; // Administrator-Permissions
-    const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=bot%20applications.commands`;
+    const permissions = 8; // Administrator-Permissions
+    const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&integration_type=0&scope=bot`;
     await interaction.reply({
       content: `You can invite me using this link: [Invite Link](${inviteUrl})`,
-      ephemeral: true,
+      flags: 64, // Ephemeral
     });
     console.log(`[Invite] Invite link sent: ${inviteUrl}\nRequested by: ${interaction.user.tag} (${interaction.user.id})`);
   }
