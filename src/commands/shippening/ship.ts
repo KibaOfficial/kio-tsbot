@@ -43,8 +43,10 @@ export const ship: Command = {
     }
 
     // Get all members in the guild
-    const members = interaction.guild!.members.cache.filter(
-      (member) => !member.user.bot && member.id !== interaction.user.id
+    const allMembers = await interaction.guild!.members.fetch();
+    // Filter out bots to only get human members
+    const members = allMembers.filter(
+      (member) => !member.user.bot
     );
 
     if (members.size < 2) {
@@ -55,9 +57,14 @@ export const ship: Command = {
       return;
     }
 
-    // Randomly select two members
-    const pair = members.random(2);
-    if (pair.length < 2) {
+    // Randomly select two different members
+    let pair = members.random(2);
+    // Ensure the two members are not the same
+    // If they are the same, select another member to pair with the first one
+    if (pair[0].id === pair[1].id && members.size > 1) {
+      pair = members.filter(m => m.id !== pair[0].id).random(1).concat(pair[0]);
+    }
+    if (pair.length < 2 || pair[0].id === pair[1].id) {
       await interaction.reply({
         content: "Could not find two members to ship.",
         flags: 64 // Ephemeral
