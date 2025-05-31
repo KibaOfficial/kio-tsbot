@@ -20,15 +20,19 @@ export class ReactionRole {
   @Column()
   emoji: string; // Emoji used for the reaction
 
+  @Column({ default: "normal" })
+  type: "normal" | "verify"; // Type of reaction role: normal (toggle) or verify (pickup only)
+
   @ManyToOne(() => ReactionRolePanel, panel => panel.roles, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'panelId' })
   panel: ReactionRolePanel;
 
-  constructor(name: string, description: string, emoji: string, roleId: string, panel: ReactionRolePanel) {
+  constructor(name: string, description: string, emoji: string, roleId: string, panel: ReactionRolePanel, type: "normal" | "verify" = "normal") {
     this.name = name;
     this.description = description;
     this.emoji = emoji;
     this.roleId = roleId;
     this.panel = panel;
+    this.type = type;
   }
 }

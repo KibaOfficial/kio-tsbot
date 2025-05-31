@@ -264,7 +264,8 @@ export async function addReactionRole(
   name: string,
   description: string,
   emoji: string,
-  roleId: string
+  roleId: string,
+  type: "normal" | "verify" = "normal"
 ) {
   if (!await ensurePermissions(interaction, ["ManageRoles"])) return;
 
@@ -293,8 +294,8 @@ export async function addReactionRole(
     return;
   }
 
-  // Create a new ReactionRole instance
-  const reactionRole = new ReactionRole(name, description, emoji, roleId, panel);
+  // Create a new ReactionRole instance with type
+  const reactionRole = new ReactionRole(name, description, emoji, roleId, panel, type);
 
   // Save the new ReactionRole to the database
   try {

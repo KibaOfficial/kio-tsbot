@@ -87,7 +87,13 @@ export const event: BotEvent<"messageReactionRemove"> = {
       return;
     }
 
-    // Remove the role from the user
+    // If verify type: do not remove the role on reaction remove
+    if (reactionRole.type === "verify") {
+      console.log(`[Event.MessageReactionRemove] Skipping role removal for verify type.`);
+      return;
+    }
+
+    // Remove the role from the user (normal type only)
     const member = await reaction.message.guild.members.fetch(user.id).catch((err) => {
       console.error(`[Event.MessageReactionRemove] Failed to fetch member:`, err);
       return null;

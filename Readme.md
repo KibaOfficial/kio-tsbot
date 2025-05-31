@@ -187,6 +187,23 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.2.3 (31 May 2025)
+- 🦊 **Reaction Role Types:** Added a `type` column to the `ReactionRole` entity. Roles can now be either `normal` (toggle add/remove) or `verify` (one-time add, reaction is removed instantly for permanent roles).
+- 🛡️ **Panel Command:** `/panel` command and backend now support the new `type` option for reaction roles (normal/verify). Type is checked when adding reaction roles.
+- 🔄 **Reaction Handling:**
+  - `messageReactionAdd` now removes the reaction if the type is `verify`.
+  - `messageReactionRemove` skips role removal if the bot removed the reaction (for verify roles).
+- 🏠 **Welcome/Leave System:**
+  - Added a new `Guild` entity to store `welcomeChannelId` and `leaveChannelId` for each server.
+  - Added `/welcome` command to configure welcome/leave channels.
+  - `guildMemberAdd` and `guildMemberRemove` events now send welcome/goodbye messages if configured.
+  - `guildCreate` event initializes the guild in the database on join.
+- ⚙️ **Database Improvements:**
+  - Added `NODE_ENV` check to the DataSource constructor to automatically disable `synchronize` in production for safety.
+- 🛠️ **Misc:**
+  - Improved type safety and logic for reaction role assignment and removal.
+  - Various bugfixes and code cleanup in event and service layers.
+
 ### v0.2.2 (31 May 2025)
 - 🏗️ **Core Refactor:** Replaced `src/bot.ts` with a new modular entrypoint (`src/index.ts`) and a dedicated `TsBot` class (`src/TsBot.ts`) for improved structure and maintainability. Wich kills the process every 24 hours to restart it. 
 - 🗃️ **Project Structure:** All bot initialization, command/event loading, and login logic is now encapsulated in `TsBot`, making the codebase easier to extend and test.

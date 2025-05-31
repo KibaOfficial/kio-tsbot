@@ -47,7 +47,8 @@ export async function ensurePermissions(
 ): Promise<boolean> {
   const perms = Array.isArray(permissions) ? permissions : [permissions];
 
-  if (!ensureInGuild(interaction)) return false;
+  // Check: In Guild?
+  if (!(await ensureInGuild(interaction))) return false;
 
   // no need to check if the user is a bot, as this is already ensured by the interactionCreate event handler
 

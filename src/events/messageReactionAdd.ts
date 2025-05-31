@@ -87,7 +87,7 @@ export const event: BotEvent<"messageReactionAdd"> = {
       return;
     }
 
-    // Check: if user already has the role
+    // Check: if user already has the role (for both types, but only skip for normal)
     const member = await reaction.message.guild.members.fetch(user.id).catch((err) => {
       console.error(`[Event.MessageReactionAdd] Failed to fetch member:`, err);
       return null;
@@ -105,6 +105,15 @@ export const event: BotEvent<"messageReactionAdd"> = {
     try {
       await member.roles.add(reactionRole.roleId, `Reaction role panel: ${panel.id}`);
       console.log(`[Event.MessageReactionAdd] User ${user.id} reacted with ${emojiKey} and received role ${reactionRole.roleId}.`);
+      // If verify type: remove the user's reaction after adding the role
+      if (reactionRole.type === "verify") {
+        try {
+          await reaction.users.remove(user.id);
+          console.log(`[Event.MessageReactionAdd] Removed reaction for verify type from user ${user.id}.`);
+        } catch (err) {
+          console.error(`[Event.MessageReactionAdd] Failed to remove reaction for verify type:`, err);
+        }
+      }
     } catch (err) {
       console.error(`[Event.MessageReactionAdd] Failed to add role:`, err);
     }
