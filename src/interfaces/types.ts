@@ -15,6 +15,7 @@ import { ChatInputCommandInteraction,  PermissionsBitField, SlashCommandBuilder,
 export interface Command {
   data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
   execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
+  category?: string;
 }
 
 export interface BotEvent<K extends keyof ClientEvents = keyof ClientEvents> {

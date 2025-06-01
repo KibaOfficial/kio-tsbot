@@ -187,6 +187,14 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.2.4 (01 June 2025)
+- 🆕 **Command Categories:** Added a `category` property to the `Command` interface and updated all commands to use it for better organization.
+- ❓ **Help Command Overhaul:** `/help` now displays a category selection menu with emojis and shows commands grouped by category. Users can browse commands interactively using a dropdown menu.
+- 🛠️ **Utility Improvements:** Added `formatCommandsDescription` utility for formatting command lists, used in the help system.
+- ⚡ **Interaction Handling:** Updated the interaction handler to support the new help menu dropdown and category navigation.
+- 🧩 **Dev Dependencies:** Added `ts-node` to dev dependencies in `package.json` and `package-lock.json`.
+- ⬆️ **Version Bump:** Updated version to 0.2.4 in `package.json` and `package-lock.json`.
+
 ### v0.2.3 (31 May 2025)
 - 🦊 **Reaction Role Types:** Added a `type` column to the `ReactionRole` entity. Roles can now be either `normal` (toggle add/remove) or `verify` (one-time add, reaction is removed instantly for permanent roles).
 - 🛡️ **Panel Command:** `/panel` command and backend now support the new `type` option for reaction roles (normal/verify). Type is checked when adding reaction roles.

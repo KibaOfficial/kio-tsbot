@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/MIT
 
 import { ChatInputCommandInteraction, User as DiscordUser } from "discord.js";
-import { PermissionFlag } from "../interfaces/types";
+import { Command, PermissionFlag } from "../interfaces/types";
 import { AppDataSource } from "./data/db";
 import { User } from "./data/entity/User";
 import { Ship } from "./data/entity/Ship";
@@ -125,4 +125,34 @@ export async function incrementPairCount(interaction: ChatInputCommandInteractio
     ship.lastPair = [user1.id, user2.id];
   }
   await shipRepo.save(ship);
+}
+
+/**
+ * Formats the commands description for display.
+ * This function takes an array of commands and formats their names and descriptions into a string.
+ * It handles nested commands and options, providing a clear hierarchy in the output.
+ * @param cmds An array of commands to format.
+ * @param indent An optional string to indent the output for better readability.
+ * @returns A formatted string containing the commands and their descriptions.
+ */
+export function formatCommandsDescription(cmds: Array<Command & { category: string }>, indent = ""): string {
+  let lines: string[] = [];
+  for (const cmd of cmds) {
+    lines.push(`${indent}└ \`/${cmd.data.name}\`: ${cmd.data.description || "No description"}`);
+    const dataJson = cmd.data.toJSON();
+    if (Array.isArray(dataJson.options)) {
+      for (const opt of dataJson.options) {
+        if (opt.type === 1) {
+          lines.push(`${indent}    └ \`/${cmd.data.name} ${opt.name}\`: ${opt.description || "No description"}`);
+        } else if (opt.type === 2 && Array.isArray(opt.options)) {
+          for (const sub of opt.options) {
+            if (sub.type === 1) {
+              lines.push(`${indent}    └ \`/${cmd.data.name} ${opt.name} ${sub.name}\`: ${sub.description || "No description"}`);
+            }
+          }
+        }
+      }
+    }
+  }
+  return lines.join("\n").trim() || "No commands available in this category.";
 }

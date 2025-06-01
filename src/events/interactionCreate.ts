@@ -3,12 +3,32 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { Events, ChatInputCommandInteraction, Interaction } from "discord.js";
-import { BotEvent } from "../interfaces/types";
+import { Events, ChatInputCommandInteraction, Interaction, StringSelectMenuInteraction, EmbedBuilder } from "discord.js";
+import { BotEvent, Command } from "../interfaces/types";
+import { formatCommandsDescription } from "../utils/utils";
 
 export const event: BotEvent<"interactionCreate"> = {
   name: Events.InteractionCreate,
   async execute(interaction: Interaction) {
+    // Handle help category select menu
+    if (interaction.isStringSelectMenu() && interaction.customId === "help_category_select") {
+      const client = interaction.client as any;
+      const commands = client.commands as Map<string, Command & { category: string }>;
+      const selectedCategory = interaction.values[0].toLowerCase(); // normalize
+      const cmds = Array.from(commands.values()).filter(cmd => {
+        const cat = (cmd.category || "misc").toLowerCase();
+        return cat === selectedCategory && cmd.data.name && !cmd.data.name.startsWith("dev-");
+      });
+      const description = formatCommandsDescription(cmds);
+      const embed = new EmbedBuilder()
+        .setColor("#5865F2")
+        .setTitle(`✨ Help - ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Commands`)
+        .setDescription(description)
+        .setFooter({ text: "Use /help to return to the main menu." });
+      await interaction.reply({ embeds: [embed], flags: 64 }); // Ephemeral
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) {
       console.log(`[Event.InteractionCreate] Ignored non-command interaction: ${interaction.id}`);
       return;

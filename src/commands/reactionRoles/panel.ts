@@ -9,6 +9,7 @@ import { ensureInGuild } from "../../utils/utils";
 import { addReactionRole, createPanel, deletePanel, listPanels, removeReactionRole } from "../../services/panelService";
 
 export const panel: Command = {
+  category: "reactionroles",
   data: new SlashCommandBuilder()
     .setName("panel")
     .setDescription("Manage reaction roles panels.")
