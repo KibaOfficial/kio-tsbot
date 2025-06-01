@@ -28,4 +28,8 @@ economyData.json
 shipData.json
 data/*
 
+# ignore frontend project for now
+/dashboard
+
+# hide the 1.0 roadmap x3
 roadmap.md
