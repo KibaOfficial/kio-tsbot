@@ -23,6 +23,7 @@ export const AppDataSource = new DataSource({
   synchronize: (process.env.NODE_ENV !== "production"), // Synchronize schema only in development
   logging: false,
   entities: [User, Shop, Ship, ReactionRolePanel, ReactionRole, Guild],
+  migrations: [__dirname + "/migrations/*{.ts,js}"],
 });
 
 /**
