@@ -591,6 +591,28 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 ## Changelog
 
+### v0.3.1 (17 June 2025)
+
+#### 📝 **Comprehensive Feedback System**
+- **Interactive Modal Forms**: New `/feedback` command opens professional modal with type, title, content, and optional image fields
+- **Smart DM Notifications**: Rich embed notifications sent directly to bot owner via Discord DMs with all feedback details
+- **Intelligent Image Handling**: Support for optional image URLs (perfect for bug report screenshots) with user avatar fallback as thumbnail
+- **Type-Based Color Coding**: Automatic color categorization (Bug Reports: Red, Ideas: Green, General: Blue) for quick visual identification
+- **Professional UX**: User confirmation messages with feedback summary and comprehensive error handling
+- **Robust Error Boundaries**: 5-minute modal timeout with proper error handling and logging
+
+#### 🎯 **User Experience Enhancements**
+- **One-Click Access**: Simple `/feedback` command immediately opens interactive modal form
+- **Flexible Categories**: Support for Bug Reports, Feature Ideas, and General Feedback with type-specific styling
+- **Screenshot Support**: Optional image URL field specifically designed for bug report documentation
+- **Instant Confirmation**: Professional confirmation message showing submitted feedback details
+
+#### 🛠️ **Technical Implementation**
+- **TypeScript Safety**: Fully typed implementation with proper Discord.js v14 integration
+- **Environment Configuration**: Bot owner ID configuration via environment variables for secure DM delivery
+- **Input Validation**: Comprehensive URL validation for image inputs with fallback handling
+- **Error Logging**: Detailed logging system for feedback submissions and delivery tracking
+
 ### v0.3.0 (17 June 2025)
 
 #### 🎨 **Major UI/UX Overhaul**
