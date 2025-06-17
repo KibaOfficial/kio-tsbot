@@ -8,6 +8,7 @@ import { ensurePermissions } from "../utils/utils";
 import { ReactionRolePanel } from "../utils/data/entity/ReactionRolePanel";
 import { AppDataSource } from "../utils/data/db";
 import { ReactionRole } from "../utils/data/entity/ReactionRole";
+import { ResponseBuilder } from "../utils/responses";
 
 /**
  * Creates a new reaction role panel in the database.
@@ -41,21 +42,26 @@ export async function createPanel(interaction: ChatInputCommandInteraction, name
   const panel = new ReactionRolePanel(panelId, guildId, name, description);
   panel.messageId = msg.id;
   panel.channelId = channel.id;
-
   // Save: the panel to the database
   try {
     await AppDataSource.getRepository(ReactionRolePanel).save(panel);
     console.log("[PanelService.CreatePanel] Panel created successfully:", panelId);
 
     // Send: confirmation message to the user
-    await interaction.editReply({
-      content: `Panel **${name}** created successfully! ID: **${panelId}**`,
-    });
+    const embed = ResponseBuilder.reactionRole(
+      "Panel Created",
+      `Panel **${name}** created successfully!\n**ID:** ${panelId}`,
+      interaction.client as Client
+    );
+    await interaction.editReply({ embeds: [embed] });
   } catch (error) {
     console.error("[PanelService.CreatePanel] Error creating panel:", error);
-    await interaction.editReply({
-      content: "An error occurred while creating the panel. Please try again later.",
-    });
+    const embed = ResponseBuilder.error(
+      "Panel Creation Failed",
+      "An error occurred while creating the panel. Please try again later.",
+      interaction.client as Client
+    );
+    await interaction.editReply({ embeds: [embed] });
   }  
 }
 

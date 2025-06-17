@@ -3,10 +3,8 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { ChatInputCommandInteraction } from "discord.js";
 import { AppDataSource } from "../../utils/data/db";
 import { Item } from "../../utils/data/entity/Item";
-import { Shop } from "../../utils/data/entity/Shop";
 import { User} from "../../utils/data/entity/User";
 
 /**
@@ -27,16 +25,21 @@ export async function transferMoney(fromUser: User, toUser: User, amount: number
     throw new Error("Amount must be greater than 0.");
   }
 
-  if (fromUser.balance < amount) {
+  // Sicherstellen, dass amount ein Integer ist
+  const numericAmount = Math.floor(Math.abs(amount));
+  
+  const fromBalance = Number(fromUser.balance) || 0;
+  if (fromBalance < numericAmount) {
     throw new Error("Insufficient balance to transfer money.");
   }
 
-  fromUser.balance -= amount;
-  toUser.balance += amount;
+  fromUser.balance = fromBalance - numericAmount;
+  toUser.balance = (Number(toUser.balance) || 0) + numericAmount;
+  
   const userRepo = AppDataSource.getRepository(User);
   await userRepo.save(fromUser);
   await userRepo.save(toUser);
-  console.log(`[ECO] Transferred ${amount} from ${fromUser.id} to ${toUser.id}.`);
+  console.log(`[ECO] Transferred ${numericAmount} from ${fromUser.id} to ${toUser.id}.`);
 }
 
 /**
@@ -50,21 +53,34 @@ export async function transferMoney(fromUser: User, toUser: User, amount: number
  * @throws - If the user does not exist, it will create a new user with default data.
  */
 export async function addMoney(user: User, amount: number): Promise<void> {
-
   if (amount <= 0) {
     throw new Error("Amount must be greater than 0.");
   }
 
+  // Sicherstellen, dass amount ein Integer ist
+  const numericAmount = Math.floor(Math.abs(amount));
+  
   const userRepo = AppDataSource.getRepository(User);
   let userData = await userRepo.findOne({ where: { id: user.id } });
   if (!userData) {
     // If user does not exist, create a new user with default data
     userData = new User(user.id, 0, undefined, undefined, undefined);
   }
-  userData.balance += amount;
-  await userRepo.save(userData);
   
-  console.log(`[ECO] Added ${amount} to ${user.id}'s balance.`); 
+  // Safe BigInt arithmetic with overflow protection
+  const currentBalance = Number(userData.balance) || 0;
+  const maxSafeBalance = Number.MAX_SAFE_INTEGER; // JavaScript's safe integer limit
+  const newBalance = currentBalance + numericAmount;
+  
+  if (newBalance > maxSafeBalance) {
+    userData.balance = maxSafeBalance;
+    console.log(`[ECO] Balance capped at maximum safe value for ${user.id}`);
+  } else {
+    userData.balance = newBalance;
+  }
+  
+  await userRepo.save(userData);
+  console.log(`[ECO] Added ${numericAmount} to ${user.id}'s balance. New balance: ${userData.balance}`);
 }
 
 /**
@@ -82,19 +98,25 @@ export async function removeMoney(user: User, amount: number): Promise<void> {
     throw new Error("Amount must be greater than 0.");
   }
 
+  // Sicherstellen, dass amount ein Integer ist
+  const numericAmount = Math.floor(Math.abs(amount));
+
   const userRepo = AppDataSource.getRepository(User);
   let userData = await userRepo.findOne({ where: { id: user.id } });
   if (!userData) {
     // If user does not exist, create a new user with default data
     userData = new User(user.id, 0, undefined, undefined, undefined);
   }
-  if (userData.balance < amount) {
+  
+  const currentBalance = Number(userData.balance) || 0;
+  
+  if (currentBalance < numericAmount) {
     throw new Error("Insufficient balance to remove money.");
   }
-  userData.balance -= amount;
+  
+  userData.balance = currentBalance - numericAmount;
   await userRepo.save(userData);
-  // Log the removal of money
-  console.log(`[ECO] Removed ${amount} from ${user.id}'s balance.`);
+  console.log(`[ECO] Removed ${numericAmount} from ${user.id}'s balance. New balance: ${userData.balance}`);
 }
 
 /**

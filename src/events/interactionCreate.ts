@@ -3,9 +3,10 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { Events, ChatInputCommandInteraction, Interaction, StringSelectMenuInteraction, EmbedBuilder } from "discord.js";
+import { Events, ChatInputCommandInteraction, Interaction, StringSelectMenuInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import { BotEvent, Command } from "../interfaces/types";
 import { formatCommandsDescription } from "../utils/utils";
+import { ResponseBuilder } from "../utils/responses";
 
 export const event: BotEvent<"interactionCreate"> = {
   name: Events.InteractionCreate,
@@ -18,14 +19,14 @@ export const event: BotEvent<"interactionCreate"> = {
       const cmds = Array.from(commands.values()).filter(cmd => {
         const cat = (cmd.category || "misc").toLowerCase();
         return cat === selectedCategory && cmd.data.name && !cmd.data.name.startsWith("dev-");
-      });
+      });      
       const description = formatCommandsDescription(cmds);
-      const embed = new EmbedBuilder()
-        .setColor("#5865F2")
-        .setTitle(`✨ Help - ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Commands`)
-        .setDescription(description)
-        .setFooter({ text: "Use /help to return to the main menu." });
-      await interaction.reply({ embeds: [embed], flags: 64 }); // Ephemeral
+      const embed = ResponseBuilder.info(
+        `✨ Help - ${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Commands`,
+        `${description}\n\nUse /help to return to the main menu.`,
+        interaction.client
+      );
+      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });// Ephemeral
       return;
     }
 
@@ -47,7 +48,7 @@ export const event: BotEvent<"interactionCreate"> = {
       console.log(`[Event.InteractionCreate] Command not found: ${interaction.commandName}`);
       await interaction.reply({
         content: "This command does not exist.",
-        flags: 64, // Only the user who invoked the command can see this message
+        flags: MessageFlags.Ephemeral, // Only the user who invoked the command can see this message
       });
       return;
     }
@@ -59,9 +60,9 @@ export const event: BotEvent<"interactionCreate"> = {
     } catch (error) {
       console.error(`[Event.InteractionCreate] Error executing command ${interaction.commandName} by ${interaction.user.tag}:`, error);
       if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({ content: 'There was an error while executing this command!', flags: 64 });
+        await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
       } else {
-        await interaction.reply({ content: 'There was an error while executing this command!', flags: 64 });
+        await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
       }
     }
   }

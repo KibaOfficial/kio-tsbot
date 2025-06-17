@@ -3,12 +3,13 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import * as dotenv from "dotenv";
 import { Command } from "../../interfaces/types";
 import { convertDiscordUserToUser } from "../../utils/utils";
 import { AppDataSource } from "../../utils/data/db";
 import { User } from "../../utils/data/entity/User";
+import { ResponseBuilder } from "../../utils/responses";
 
 dotenv.config();
 
@@ -46,26 +47,41 @@ export const daily: Command = {
     // Get: Current time
     const currentTime = Date.now()
     // Check: if user already got daily reward
-    if (dbUser.lastDaily && currentTime - dbUser.lastDaily < 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
+    const lastDaily = Number(dbUser.lastDaily) || 0;
+    if (dbUser.lastDaily && currentTime - lastDaily < 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
       // Calculate remaining time until next daily claim
-      const remainingTime = 24 * 60 * 60 * 1000 - (currentTime - dbUser.lastDaily);
+      const remainingTime = 24 * 60 * 60 * 1000 - (currentTime - lastDaily);
       const hours = Math.floor(remainingTime / (1000 * 60 * 60));
       const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+      
+      const embed = ResponseBuilder.warning(
+        "Daily Already Claimed",
+        `You have already claimed your daily reward!\n\n⏰ **Come back in:** ${hours}h ${minutes}m ${seconds}s`,
+        interaction.client
+      );
+      
       await interaction.reply({
-        content: `You have already claimed your daily reward! Come back in **${hours}h ${minutes}m ${seconds}s** to claim again!`,
-        flags: 64, // Ephemeral
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral, // Ephemeral
       });
       return;
     }
     // Update the user's balance and last daily claim time
-    dbUser.balance += DAILY_AMOUNT;
+    dbUser.balance = (Number(dbUser.balance) || 0) + DAILY_AMOUNT;
     dbUser.lastDaily = currentTime;
     await userRepository.save(dbUser);
+    
     // Reply to the user with the daily reward message
+    const embed = ResponseBuilder.economy(
+      "Daily Reward Claimed!",
+      `You have claimed your daily reward of **${DAILY_AMOUNT}** fops! 🦊\n\n💰 **New Balance:** ${dbUser.balance} fops\n⏰ **Come back tomorrow for more!**`,
+      interaction.client
+    );
+    
     await interaction.reply({
-      content: `You have claimed your daily reward of **${DAILY_AMOUNT}** fops! 🦊\n\nCome back tomorrow for more!`,
-      flags: 64, // Ephemeral
+      embeds: [embed],
+      flags: MessageFlags.Ephemeral, // Ephemeral
     });
   },
 };

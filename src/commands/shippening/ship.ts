@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { convertDiscordUserToUser, ensureInGuild, incrementPairCount } from "../../utils/utils";
 import { AppDataSource } from "../../utils/data/db";
 import { Ship } from "../../utils/data/entity/Ship";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Command to ship two random users in the server.
@@ -52,7 +53,7 @@ export const ship: Command = {
     if (members.size < 2) {
       await interaction.reply({
         content: "Not enough members to ship.",
-        flags: 64 // Ephemeral
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
     }
@@ -67,18 +68,20 @@ export const ship: Command = {
     if (pair.length < 2 || pair[0].id === pair[1].id) {
       await interaction.reply({
         content: "Could not find two members to ship.",
-        flags: 64 // Ephemeral
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
-    }
-
-    // convert discord users to user objects
+    }    // convert discord users to user objects
     const user1 = await convertDiscordUserToUser(pair[0].user);
     const user2 = await convertDiscordUserToUser(pair[1].user);
     await incrementPairCount(interaction, user1, user2);
 
-    await interaction.reply(
-      `**Shipped!**\n\n<@${user1.id}> ❤️ <@${user2.id}>\n\n`
+    const embed = ResponseBuilder.shippening(
+      "Shipped!",
+      `<@${user1.id}> ❤️ <@${user2.id}>`,
+      interaction.client
     );
+
+    await interaction.reply({ embeds: [embed] });
   },
 };

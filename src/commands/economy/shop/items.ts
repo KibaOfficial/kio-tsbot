@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../../interfaces/types";
 import { Shop } from "../../../utils/data/entity/Shop";
 import { Item } from "../../../utils/data/entity/Item";
@@ -49,7 +49,7 @@ export const item: Command = {
     if (!itemObj) {
       await interaction.reply({
         content: `Item "${itemName}" not found in the shop.`,
-        flags: 64 // Ephemeral
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
     }
@@ -72,7 +72,7 @@ export const item: Command = {
     if (!hasItem) {
       await interaction.reply({
         content: `You do not have the item "${itemObj.name}" in your inventory.`,
-        flags: 64 // Ephemeral
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
     }
@@ -92,7 +92,7 @@ export const item: Command = {
       default:
         await interaction.reply({
           content: `Item "${itemObj.name}" does not have a defined effect yet. Please check back later!`,
-          flags: 64 // Ephemeral
+          flags: MessageFlags.Ephemeral // Ephemeral
         });
         break;
     }

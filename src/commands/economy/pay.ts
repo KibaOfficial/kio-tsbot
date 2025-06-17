@@ -3,10 +3,11 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { transferMoney } from "./data";
 import { convertDiscordUserToUser } from "../../utils/utils";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Command to send fops to another user.
@@ -39,14 +40,28 @@ export const pay: Command = {
 
     try {
       await transferMoney(fromUser, toUser, amount);
+      
+      const embed = ResponseBuilder.economy(
+        "Payment Successful",
+        `Successfully sent **${amount}** fops 🦊 to <@${toUser.id}>!\n\n💸 **Transaction Complete**`,
+        interaction.client
+      );
+      
       await interaction.reply({
-        content: `✅ Successfully sent **${amount}** fops 🦊 to <@${toUser.id}>!`,
+        embeds: [embed]
       });
     } catch (error) {
       console.error("[ECO] Error during money transfer:", error);
+      
+      const embed = ResponseBuilder.error(
+        "Payment Failed",
+        `An error occurred while trying to send fops: ${error instanceof Error ? error.message : String(error)}\n\nPlease try again later.`,
+        interaction.client
+      );
+      
       await interaction.reply({
-        content: `❌ An error occurred while trying to send fops: ${error instanceof Error ? error.message : String(error)}\n\nPlease try again later.`,
-        flags: 64 // Ephemeral
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
     }
   }

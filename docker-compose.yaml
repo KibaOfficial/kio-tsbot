@@ -4,8 +4,50 @@ services:
   kio-tsbot:
     image: kio-tsbot-prod
     container_name: kio-tsbot
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
-      - ./data:/app/data
+      - ./data:/app/data    
+    depends_on:
+      kio-tsbot-db:
+        condition: service_healthy
+    networks:
+      - kiotsbot-network
+    labels:
+      - "kio.service=bot"
+      - "kio.environment=production"
+      
+  kio-tsbot-db:
+    image: postgres:16-alpine
+    container_name: kio-tsbot-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:5432"    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - kiotsbot-network
+    labels:
+      - "kio.service=database"
+      - "kio.environment=shared"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  kiotsbot-network:
+    driver: bridge

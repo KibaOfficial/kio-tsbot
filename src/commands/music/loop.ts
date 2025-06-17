@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
 import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
 import { ensureInGuild } from "../../utils/utils";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Leave command for Discord bot.
@@ -47,43 +48,66 @@ export const loop: Command = {
     if (!(await ensureBotInSameVoice(interaction, voiceChannel))) return;
 
     const player = await getPlayer(interaction.client);
-    const queue = player.nodes.get(interaction.guild!.id);
-
+    const queue = player.nodes.get(interaction.guild!.id);    
     if (!queue || !queue.node.isPlaying() || !queue.currentTrack) {
+      const embed = ResponseBuilder.music(
+        "❌ No Music Playing", 
+        "There is no music currently playing in this server.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "There is no music currently playing in this server.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
-
     const mode = interaction.options.get("mode")?.value as string;
     switch (mode) {
       case "off":
         queue.setRepeatMode(0);
+        const offEmbed = ResponseBuilder.music(
+          "🔁 Loop Mode Off", 
+          "Loop mode has been turned off.",
+          interaction.client
+        );
         await interaction.reply({
-          content: "Loop mode has been turned off.",
-          flags: 64,
+          embeds: [offEmbed],
+          flags: MessageFlags.Ephemeral,
         });
         break;
       case "song":
         queue.setRepeatMode(1);
+        const songEmbed = ResponseBuilder.music(
+          "🔂 Song Loop", 
+          "Loop mode has been set to repeat the current song.",
+          interaction.client
+        );
         await interaction.reply({
-          content: "Loop mode has been set to repeat the current song.",
-          flags: 64,
+          embeds: [songEmbed],
+          flags: MessageFlags.Ephemeral,
         });
         break;
       case "queue":
         queue.setRepeatMode(2);
+        const queueEmbed = ResponseBuilder.music(
+          "🔁 Queue Loop", 
+          "Loop mode has been set to repeat the entire queue.",
+          interaction.client
+        );
         await interaction.reply({
-          content: "Loop mode has been set to repeat the entire queue.",
-          flags: 64,
+          embeds: [queueEmbed],
+          flags: MessageFlags.Ephemeral,
         });
         break;
       default:
+        const errorEmbed = ResponseBuilder.error(
+          "Invalid Loop Mode", 
+          "Invalid loop mode specified.",
+          interaction.client
+        );
         await interaction.reply({
-          content: "Invalid loop mode specified.",
-          flags: 64,
+          embeds: [errorEmbed],
+          flags: MessageFlags.Ephemeral,
         });
         break;
     }

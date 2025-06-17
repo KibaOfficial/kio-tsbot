@@ -5,6 +5,7 @@
 
 import { SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Ping command for Discord bot.
@@ -21,15 +22,18 @@ export const ping: Command = {
     .setDescription("Replies with Pong and the latency"),
   async execute(interaction) {
     const start = Date.now();
-    await interaction.deferReply();
-    const latency = Date.now() - start;
+    await interaction.deferReply();    const latency = Date.now() - start;
     const apiLatency =
       interaction.client.ws.ping >= 0
         ? `${Math.round(interaction.client.ws.ping)}ms`
         : "unavailable";
 
-    await interaction.editReply(
-      `🏓 Latency is ${latency}ms. API Latency is ${apiLatency}`
+    const embed = ResponseBuilder.info(
+      "Ping Results",
+      `🏓 **Bot Latency:** ${latency}ms\n🌐 **API Latency:** ${apiLatency}`,
+      interaction.client
     );
+
+    await interaction.editReply({ embeds: [embed] });
   },
 };

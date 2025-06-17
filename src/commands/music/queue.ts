@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
 import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
 import { ensureInGuild } from "../../utils/utils";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Queue command for Discord bot.
@@ -38,9 +39,14 @@ export const queue: Command = {
     const queue = player.nodes.get(interaction.guild!.id);
 
     if (!queue || !queue.node.isPlaying() || !queue.currentTrack) {
+      const embed = ResponseBuilder.music(
+        "No Music Playing",
+        "🔇 There is no music currently playing in this server.\n\nUse `/play` to start playing music!",
+        interaction.client
+      );
       await interaction.reply({
-        content: "There is no music currently playing in this server.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -63,14 +69,14 @@ export const queue: Command = {
       formattedTracks.push(`...and ${nextTracks.length - (maxDisplay - 1)} more tracks in the queue.`);
     }
 
-    const embed = new EmbedBuilder()
-      .setColor("#1DB954")
-      .setTitle("🎵 Music Queue")
-      .setThumbnail(currentTrack.thumbnail ?? "https://cdn-icons-png.flaticon.com/512/727/727245.png")
-      .setDescription(formattedTracks.join("\n"))
-      .setFooter({ text: `Total songs in queue: ${1 + nextTracks.length}` })
-      .setTimestamp();
+    const embed = ResponseBuilder.music(
+      "🎵 Music Queue",
+      formattedTracks.join("\n"),
+      interaction.client
+    ).setThumbnail(currentTrack.thumbnail ?? "https://cdn-icons-png.flaticon.com/512/727/727245.png")
+     .setFooter({ text: `Total songs in queue: ${1 + nextTracks.length}` })
+     .setTimestamp();
 
-    await interaction.reply({ embeds: [embed], flags: 64 });
+    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
   },
 };

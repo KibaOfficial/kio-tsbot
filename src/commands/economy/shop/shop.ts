@@ -3,14 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import {
-  SlashCommandBuilder,
-  EmbedBuilder,
-} from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../../interfaces/types";
 import { Item } from "../../../utils/data/entity/Item";
 import { Shop } from "../../../utils/data/entity/Shop";
 import { AppDataSource } from "../../../utils/data/db";
+import { ResponseBuilder } from "../../../utils/responses";
 
 /**
  * Command to view the economy shop.
@@ -33,18 +31,25 @@ export const shop: Command = {
   async execute(interaction) {
     const shop = await AppDataSource.getRepository(Shop).findOne({
       where: { id: 1 },
-    });
-    if (!shop) {
+    });    if (!shop) {
+      const embed = ResponseBuilder.economy(
+        "Shop Unavailable",
+        "The shop is currently unavailable. Please try again later.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "Shop data is not available.",
-        flags: 64, // Ephemeral
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral, // Ephemeral
       });
       return;
     }
-    const embed = new EmbedBuilder()
-      .setTitle(shop.name)
-      .setDescription(shop.description)
-      .setColor(0xff9900);
+
+    const embed = ResponseBuilder.economy(
+      shop.name,
+      shop.description,
+      interaction.client
+    );
+
     shop.items.forEach((item: Item) => {
       embed.addFields({
         name: `${item.emoji ? item.emoji + " " : ""}${item.name}`,
@@ -52,6 +57,7 @@ export const shop: Command = {
         inline: false,
       });
     });
-    await interaction.reply({ embeds: [embed], flags: 64 }); // Ephemeral
+
+    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral }); // Ephemeral
   },
 };

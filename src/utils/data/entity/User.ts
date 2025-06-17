@@ -23,17 +23,25 @@ import { Item } from "./Item";
 export class User {
   @PrimaryColumn()
   id: string; // User ID
-
-  @Column({ type: "integer", default: 0 })
+  @Column({ type: "bigint", default: 0, transformer: {
+    to: (value: number) => value?.toString(),
+    from: (value: string) => Number(value)
+  }})
   balance: number; // User's balance
 
-  @Column({ type: "bigint", nullable: true })
+  @Column({ type: "bigint", nullable: true, transformer: {
+    to: (value: number | undefined) => value?.toString(),
+    from: (value: string | null) => value ? Number(value) : undefined
+  }})
   lastDaily?: number; // Timestamp of the last daily reward claimed
 
   @Column({ type: "simple-json", default: "[]" })
   inventory: Item[]; // Array of items in the user's inventory
 
-  @Column({ type: "bigint", nullable: true })
+  @Column({ type: "bigint", nullable: true, transformer: {
+    to: (value: number | undefined) => value?.toString(),
+    from: (value: string | null) => value ? Number(value) : undefined
+  }})
   multiplierExpiresAt?: number; // Timestamp when the multiplier expires
 
   constructor(

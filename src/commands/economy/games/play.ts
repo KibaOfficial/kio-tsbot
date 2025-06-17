@@ -3,11 +3,16 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
-import { playSlots } from "./games/slots";
-import { Command } from "../../interfaces/types";
-import { AppDataSource } from "../../utils/data/db";
-import { User } from "../../utils/data/entity/User";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
+import { Command } from "../../../interfaces/types";
+import { AppDataSource } from "../../../utils/data/db";
+import { User } from "../../../utils/data/entity/User";
+import { ResponseBuilder } from "../../../utils/responses";
+// Games
+import { playSlots } from "./slots";
+import { playBlackjack } from "./blackjack";
+import { playCoinflipSimple } from "./coinflip";
+import { playRouletteSimple } from "./roulette";
 
 /**
  * Command to play a game in the economy system.
@@ -26,9 +31,11 @@ export const playgame: Command = {
     .addStringOption(option =>
       option.setName("game")
         .setDescription("Choose a game to play")
-        .setRequired(true)
-        .addChoices(
+        .setRequired(true)        .addChoices(
           { name: "Slot Machine", value: "slot" },
+          { name: "Blackjack", value: "blackjack" },
+          { name: "Coinflip", value: "coinflip" },
+          { name: "Roulette", value: "roulette" },
         )
     )
     .addIntegerOption(option =>
@@ -63,16 +70,26 @@ export const playgame: Command = {
     }
 
     // Log the multiplier status
-    console.log(`[ECO] User has ${activeMultiplier ? "an active multiplier" : "no active multiplier"}.`);
-
-    switch (game) {
+    console.log(`[ECO] User has ${activeMultiplier ? "an active multiplier" : "no active multiplier"}.`);    switch (game) {
       case "slot":
         await playSlots(interaction, bet, activeMultiplier);
         break;
-      default:
+      case "blackjack":
+        await playBlackjack(interaction, bet, activeMultiplier);
+        break;      case "coinflip":
+        await playCoinflipSimple(interaction, bet, activeMultiplier);
+        break;
+      case "roulette":
+        await playRouletteSimple(interaction, bet, activeMultiplier);
+        break;      default:
+        const embed = ResponseBuilder.error(
+          "Unknown Game",
+          "❌ Unknown game. Please choose a valid game from the options.",
+          interaction.client
+        );
         await interaction.reply({
-          content: "Unknown game. Please choose a valid game.",
-          flags: 64 // Ephemeral message
+          embeds: [embed],
+          flags: MessageFlags.Ephemeral,
         });
         break;
     }

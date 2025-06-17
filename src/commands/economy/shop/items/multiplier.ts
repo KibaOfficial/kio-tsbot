@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, MessageFlags } from "discord.js";
 import { AppDataSource } from "../../../../utils/data/db";
 import { User } from "../../../../utils/data/entity/User";
 
@@ -33,7 +33,7 @@ export async function useMultiplier(interaction: ChatInputCommandInteraction): P
     const remaining = Math.ceil((user.multiplierExpiresAt - currentTime) / 1000);
     await interaction.reply({
       content: `You already have a multiplier active! It will expire in ${remaining} seconds.`,
-      flags: 64 // Ephemeral
+      flags: MessageFlags.Ephemeral // Ephemeral
     });
     return;
   }
@@ -46,6 +46,6 @@ export async function useMultiplier(interaction: ChatInputCommandInteraction): P
   
   await interaction.reply({
     content: "✅ Multiplier applied! Your win reward will be multiplied for the next 3 hours.",
-    flags: 64 // Ephemeral
+    flags: MessageFlags.Ephemeral // Ephemeral
   });
 }

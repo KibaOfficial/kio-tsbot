@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, } from "discord.js";
+import { MessageFlags, SlashCommandBuilder, } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
 import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
@@ -41,7 +41,7 @@ export const resume: Command = {
     if (!queue || !queue.currentTrack) {
       await interaction.reply({
         content: "There's no music playing right now.",
-        flags: 64
+        flags: MessageFlags.Ephemeral
       });
       return;
     }
@@ -49,7 +49,7 @@ export const resume: Command = {
     if (!queue.node.isPaused()) {
       await interaction.reply({
         content: "The music is already playing.",
-        flags: 64
+        flags: MessageFlags.Ephemeral
       });
       return;
     }
@@ -58,7 +58,7 @@ export const resume: Command = {
     queue.node.setPaused(false);
     await interaction.reply({
       content: "▶️ The music has been resumed.",
-      flags: 64
+      flags: MessageFlags.Ephemeral
     });
   }
 }

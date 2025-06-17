@@ -15,7 +15,7 @@ export const commandName: Command = {
     // Your command logic goes here
     await interaction.reply({
       content: "This is a placeholder response for the command.",
-      flags: 64, // Ephemeral
+      flags: MessageFlags.Ephemeral, // Ephemeral
     });
   }
 }

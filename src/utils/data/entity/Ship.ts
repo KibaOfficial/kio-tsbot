@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryColumn, Column } from "typeorm";
 
 /**
  * Represents a ship in the guild.
@@ -21,7 +21,7 @@ import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
  */
 @Entity()
 export class Ship {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn({ type: "varchar" })
   id: string; // Primary key for the ship guild.id
 
   @Column({ type: "simple-json", nullable: true })

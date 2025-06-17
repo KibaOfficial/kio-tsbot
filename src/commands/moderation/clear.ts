@@ -4,10 +4,12 @@
 // https://opensource.org/licenses/MIT
 
 import {
+  MessageFlags,
   SlashCommandBuilder,
   TextChannel,
 } from "discord.js";
 import { Command } from "../../interfaces/types";
+import { ResponseBuilder } from "../../utils/responses";
 import { ensureInGuild, ensurePermissions } from "../../utils/utils";
 
 /**
@@ -57,7 +59,7 @@ export const clear: Command = {
     if (!channel || !(channel instanceof TextChannel)) {
       await interaction.reply({
         content: "This command can only be used in a text channel.",
-        flags: 64, // Ephemeral message
+        flags: MessageFlags.Ephemeral, // Ephemeral message
       });
       return;
     }
@@ -65,7 +67,7 @@ export const clear: Command = {
     const textChannel = channel as TextChannel;
     
     try {
-      await interaction.deferReply({ flags: 64 }); // Ephemeral message
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral }); // Ephemeral message
 
       if (amount === "all") {
         let fetched;
@@ -76,20 +78,33 @@ export const clear: Command = {
           totalDeleted += fetched.size;
         } while (fetched.size > 0);
 
+        const embed = ResponseBuilder.moderation(
+          "Messages Cleared",
+          `🧹 Successfully cleared **${totalDeleted}** messages from the channel.`,
+          interaction.client
+        );
         await interaction.editReply({
-          content: `🧹 Successfully cleared **${totalDeleted}** messages from the channel.`,
+          embeds: [embed]
         });
       } else {
         const deleted = await textChannel.bulkDelete(amount, true);
+        const embed = ResponseBuilder.moderation(
+          "Messages Cleared",
+          `🧹 Successfully cleared **${deleted.size}** messages from the channel.`,
+          interaction.client
+        );
         await interaction.editReply({
-          content: `🧹 Successfully cleared **${deleted.size}** messages from the channel.`,
+          embeds: [embed]
         });
-      }
-    } catch (error) {
+      }    } catch (error) {
       console.error("[Moderation] Error clearing messages:", error);
+      const embed = ResponseBuilder.error(
+        "Clear Failed",
+        "❌ An error occurred while trying to clear messages. Please try again later.",
+        interaction.client
+      );
       await interaction.editReply({
-        content:
-          "❌ An error occurred while trying to clear messages. Please try again later.",
+        embeds: [embed]
       });
     }
   },

@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder, CommandInteraction, MessageFlags } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
 import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
 import { ensureInGuild } from "../../utils/utils";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Skip command for Discord bot.
@@ -40,18 +41,28 @@ export const skip: Command = {
     const queue = player.nodes.get(interaction.guild!.id);
 
     if (!queue) {
+      const embed = ResponseBuilder.music(
+        "No Music Playing",
+        "🔇 There is no music playing in this server.\n\nUse `/play` to start playing music!",
+        interaction.client
+      );
       await interaction.reply({
-        content: "There is no music playing in this server.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
     // check if there is a song to skip
     if (!queue.node.isPlaying()) {
+      const embed = ResponseBuilder.music(
+        "Nothing to Skip",
+        "⏸️ There is no song to skip.\n\nThe queue is currently empty or paused.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "There is no song to skip.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -60,26 +71,37 @@ export const skip: Command = {
     const skipped = queue.node.skip();
 
     if (skipped) {
-      let content = "✅ Skipped the current song.";
-
       // wait for the next track to be ready
       await new Promise(res => setTimeout(res, 200));
       const currentTrack = queue.currentTrack;
 
+      let description = "⏭️ **Skipped the current song.**";
+      
       if (currentTrack) {
         // log the used extractor
         console.log(`[Music] Extractor used: ${currentTrack.extractor!.identifier || "Unknown"}`);
-        content += `\n🎶 **Now playing:** [${currentTrack.title}](${currentTrack.url}) - \`${currentTrack.author}\` [${currentTrack.duration}]`;
+        description += `\n\n🎶 **Now playing:** [${currentTrack.title}](${currentTrack.url}) - \`${currentTrack.author}\` [${currentTrack.duration}]`;
       } else {
-        content += `\nEs gibt keinen weiteren Song in der Queue.`;
+        description += `\n\n🔇 No more songs in the queue.`;
       }
 
-      await interaction.reply({ content });
+      const embed = ResponseBuilder.music(
+        "Song Skipped",
+        description,
+        interaction.client
+      );
+      
+      await interaction.reply({ embeds: [embed] });
     } else {
       // if skip should fail (which is unlikely)
+      const embed = ResponseBuilder.error(
+        "Skip Failed",
+        "❌ Unable to skip the current song. Please try again later.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "❌ Unable to skip the current song. Please try again later.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
     }
   }

@@ -3,10 +3,11 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, MessageFlags } from "discord.js";
 import { addMoney, removeMoney } from "../data";
 import { AppDataSource } from "../../../utils/data/db";
 import { User } from "../../../utils/data/entity/User";
+import { ResponseBuilder } from "../../../utils/responses";
 
 const slotEmojis = [
   { emoji: "🍒", multiplier: 3 },
@@ -50,19 +51,30 @@ export async function playSlots(interaction: ChatInputCommandInteraction, bet: n
     user = new User(userId, 0, undefined, undefined, undefined);
     await userRepo.save(user);
     console.log(`[SLOTS] Created new user ${userId} with default balance.`);
+    const embed = ResponseBuilder.economy(
+      "Welcome to Slots!",
+      "🎰 Welcome to the slot machine! You have been given **0 fops 🦊**. Please earn some money before playing!",
+      interaction.client
+    );
     await interaction.reply({
-      content: `Welcome to the slot machine! You have been given **0 fops 🦊**. Please earn some money before playing!`,
-      flags: 64 // Ephemeral
+      embeds: [embed],
+      flags: MessageFlags.Ephemeral,
     });
+    return;
   }
 
   try {
     await removeMoney(user!, bet);
   } catch (error) {
     console.error(`[SLOTS] Error removing money for user ${userId}:`, error);
+    const embed = ResponseBuilder.error(
+      "Insufficient Balance",
+      `❌ You don't have enough fops 🦊 to play! You need at least **${bet.toLocaleString()} fops 🦊**.`,
+      interaction.client
+    );
     await interaction.reply({
-      content: `❌ You don't have enough fops 🦊 to play! You need at least ${bet} fops 🦊.`,
-      flags: 64 // Ephemeral
+      embeds: [embed],
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -91,12 +103,15 @@ export async function playSlots(interaction: ChatInputCommandInteraction, bet: n
     console.log(`[ECO]  `)
     console.log(`[SLOTS] User ${userId} lost ${bet} fops 🦊.`);
   }
-
   await interaction.reply({
-    content:
-      `🎰 **Slot Machine** 🎰\n` +
-      (win
-        ? `**You win!** You got ${spin.join(" ")} and earned **${reward} fops 🦊**!`
-        : `**You lost ${bet} fops 🦊.** You got ${spin.join(" ")}. Better luck next time!`),
+    embeds: [
+      ResponseBuilder.economy(
+        "🎰 Slot Machine Result",
+        win 
+          ? `🎉 **YOU WIN!**\n\n**Spin Result:** ${spin.join(" ")}\n**Bet:** ${bet.toLocaleString()} fops 🦊\n**Base Winnings:** ${reward.toLocaleString()} fops 🦊${activeMultiplier ? `\n**Multiplier Bonus:** +${reward.toLocaleString()} fops 🦊\n**Total Winnings:** ${(reward * 2).toLocaleString()} fops 🦊` : `\n**Total Winnings:** ${reward.toLocaleString()} fops 🦊`}`
+          : `💔 **YOU LOST!**\n\n**Spin Result:** ${spin.join(" ")}\n**Lost:** ${bet.toLocaleString()} fops 🦊\n\n💡 **Tip:** Match all 3 symbols to win!`,
+        interaction.client
+      )
+    ]
   });
 }

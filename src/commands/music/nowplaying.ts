@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, EmbedBuilder } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
 import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
 import { ensureInGuild } from "../../utils/utils";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Now Playing command for Discord bot.
@@ -36,30 +37,37 @@ export const nowplaying: Command = {
     if (!(await ensureBotInSameVoice(interaction, voiceChannel))) return;
 
     const player = await getPlayer(interaction.client);
-    const queue = player.nodes.get(interaction.guild!.id);
-    if (!queue || !queue.node.isPlaying() || !queue.currentTrack) {
+    const queue = player.nodes.get(interaction.guild!.id);    if (!queue || !queue.node.isPlaying() || !queue.currentTrack) {
+      const embed = ResponseBuilder.music(
+        "No Song Playing",
+        "There is no song currently playing.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "There is no song currently playing.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
     // create an embed with the current song information
     const currentTrack = queue.currentTrack;
-    const embed = new EmbedBuilder()
-      .setColor("#0099ff")
-      .setTitle("Now Playing")
-      .setDescription(
-        `**[${currentTrack.title}](${currentTrack.url})**\n` +
-        `**Artist:** ${currentTrack.author}\n` +
-        `**Duration:** ${currentTrack.duration}`
-      )
-      .setThumbnail(currentTrack.thumbnail ?? "https://cdn-icons-png.flaticon.com/512/727/727245.png")
-      .setFooter({
-        text: `Requested by ${currentTrack.requestedBy ? currentTrack.requestedBy.username : "Unknown"}`,
-        iconURL: currentTrack.requestedBy?.displayAvatarURL?.() ?? undefined
+    const embed = ResponseBuilder.music(
+      "Now Playing",
+      `**[${currentTrack.title}](${currentTrack.url})**\n` +
+      `**Artist:** ${currentTrack.author}\n` +
+      `**Duration:** ${currentTrack.duration}`,
+      interaction.client
+    );
+    
+    embed.setThumbnail(currentTrack.thumbnail ?? "https://cdn-icons-png.flaticon.com/512/727/727245.png");
+    
+    if (currentTrack.requestedBy) {
+      embed.setFooter({
+        text: `Requested by ${currentTrack.requestedBy.username}`,
+        iconURL: currentTrack.requestedBy.displayAvatarURL?.() ?? undefined
       });
+    }
 
     await interaction.reply({ embeds: [embed] });
   }

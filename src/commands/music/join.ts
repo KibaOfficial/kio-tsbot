@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
 import { ensureInVoice } from "../../utils/voiceUtils";
 import { ensureInGuild } from "../../utils/utils";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Join command for Discord bot.
@@ -29,20 +30,29 @@ export const join: Command = {
 
     // Check: User in VoiceChannel?
     const voiceChannel = await ensureInVoice(interaction);
-    if (!voiceChannel) return;
-
+    if (!voiceChannel) return;    
     const botVoiceChannel = interaction.guild!.members.me?.voice.channel;
     if (botVoiceChannel) {
       if (botVoiceChannel.id === voiceChannel.id) {
+        const embed = ResponseBuilder.music(
+          "Already Connected",
+          "🔊 I am already in your voice channel.\n\nUse `/play` to start playing music!",
+          interaction.client
+        );
         await interaction.reply({
-          content: "I am already in your voice channel.",
-          flags: 64,
+          embeds: [embed],
+          flags: MessageFlags.Ephemeral,
         });
         return;
       } else {
+        const embed = ResponseBuilder.warning(
+          "Different Voice Channel",
+          `⚠️ I am already in a different voice channel (**${botVoiceChannel.name}**).\n\nPlease move me to your voice channel or use \`/leave\` first.`,
+          interaction.client
+        );
         await interaction.reply({
-          content: `I am already in a different voice channel (${botVoiceChannel.name}). Please move me to your voice channel.`,
-          flags: 64,
+          embeds: [embed],
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -60,14 +70,24 @@ export const join: Command = {
 
     try {
       await queue.connect(voiceChannel);
+      const embed = ResponseBuilder.music(
+        "Joined Voice Channel",
+        `🔊 **Successfully joined ${voiceChannel.name}!**\n\nUse \`/play\` to start playing music!`,
+        interaction.client
+      );
       await interaction.reply({
-        content: `✅ Joined ${voiceChannel.name}.`,
+        embeds: [embed],
       });
     } catch (error) {
       console.error("[Music] Error joining voice channel:", error);
+      const embed = ResponseBuilder.error(
+        "Join Failed",
+        "❌ An error occurred while trying to join the voice channel.\n\nMake sure I have permission to **Join** and **Speak** in that channel.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "An error occurred while trying to join the voice channel. Make sure I have permission to join and speak in that channel.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
     }
   }

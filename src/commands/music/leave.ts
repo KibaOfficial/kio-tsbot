@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
 import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
 import { ensureInGuild } from "../../utils/utils";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Leave command for Discord bot.
@@ -36,23 +37,31 @@ export const leave: Command = {
     if (!(await ensureBotInSameVoice(interaction, voiceChannel))) return;
 
     const player = await getPlayer(interaction.client);
-    const queue = player.nodes.get(interaction.guild!.id);
-
-    try {
+    const queue = player.nodes.get(interaction.guild!.id);    try {
       if (queue) {
         queue.delete();
       } else {
         await interaction.guild!.members.me?.voice.disconnect();
       }
+      const embed = ResponseBuilder.music(
+        "Left Voice Channel",
+        "👋 **Successfully left the voice channel.**\n\nMusic has been stopped and queue cleared.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "✅ I have left the voice channel.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error("Error leaving voice channel:", error);
+      const embed = ResponseBuilder.error(
+        "Leave Failed",
+        "❌ An error occurred while trying to leave the voice channel.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "❌ An error occurred while trying to leave the voice channel.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
     }
   }

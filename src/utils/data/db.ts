@@ -11,20 +11,28 @@ import { Ship } from "./entity/Ship";
 import { ReactionRolePanel } from "./entity/ReactionRolePanel";
 import { ReactionRole } from "./entity/ReactionRole";
 import { Guild } from "./entity/Guild";
+import { config } from "dotenv";
+
+config();
 
 /**
  * AppDataSource is the main database connection for the application.
- * It uses SQLite as the database type and connects to a local file `./data/bot.sqlite`.
+ * It uses PostgreSQL as the database type and connects to the database
+ * using the credentials and host information from the environment variables.
  * The `synchronize` option is set to true for development purposes, allowing the database schema to be automatically updated.
  */
 export const AppDataSource = new DataSource({
-  type: "sqlite",
-  database: "./data/bot.sqlite",
+  type: "postgres",
+  host: process.env.DB_HOST || "localhost",
+  port: parseInt(process.env.DB_PORT || "5432", 10),
+  username: process.env.DB_USER || "",
+  password: process.env.DB_PASS || "",
+  database: process.env.DB_NAME || "",
   synchronize: (process.env.NODE_ENV !== "production"), // Synchronize schema only in development
   logging: false,
   entities: [User, Shop, Ship, ReactionRolePanel, ReactionRole, Guild],
-  migrations: ["./data/migrations/*{.ts,.js}"],
-});
+  migrations: ["./data/migrations/pg/*{.ts,.js}"],
+})
 
 /**
  * Initializes the database connection.

@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction, GuildMember, EmbedBuilder } from "discord.js";
+import { SlashCommandBuilder, MessageFlags } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer, queueLimit } from "../../music/player";
 import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
 import { ensureInGuild } from "../../utils/utils";
+import { ResponseBuilder } from "../../utils/responses";
 
 export const play: Command = {
   data: new SlashCommandBuilder()
@@ -37,7 +38,7 @@ export const play: Command = {
     if (!player) {
       await interaction.reply({
         content: "Music player is not initialized. Please try again later.",
-        flags: 64,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -64,7 +65,7 @@ export const play: Command = {
       if (!result || !result.tracks.length) {
         await interaction.reply({
           content: "No results found for your query.",
-          flags: 64,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -74,7 +75,7 @@ export const play: Command = {
       if (totalQueued > queueLimit) {
         await interaction.reply({
           content: `The queue limit is ${queueLimit} songs. You cannot add more songs.`,
-          flags: 64,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -87,34 +88,33 @@ export const play: Command = {
 
       if (!queue.node.isPlaying()) await queue.node.play();
 
-      const embed = new EmbedBuilder()
-        .setColor("#0099ff")
-        .setTimestamp()
-        .setFooter({ text: `Requested by ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL() });
+      let embed;
       if (result.playlist) {
-        embed
-          .setTitle(`Playlist added to queue: ${result.playlist.title}`)
-          .setDescription(`[${result.playlist.title}](${result.playlist.url})`)
-          .addFields(
-            { name: "Tracks", value: `${tracksToAdd.length}`, inline: true },
-            { name: "Author", value: result.playlist.author?.name || "Unknown", inline: true }
-          )
-          .setThumbnail(result.playlist.thumbnail || result.tracks[0]?.thumbnail || null)
-          .addFields({
-            name: "First 5 tracks",
-            value: result.tracks.slice(0, 5).map(t => `[${t.title}](${t.url})`).join("\n"),
-            inline: false,
-          });
+        embed = ResponseBuilder.music(
+          `Playlist added to queue: ${result.playlist.title}`,
+          `[${result.playlist.title}](${result.playlist.url})\n\n` +
+          `**Tracks:** ${tracksToAdd.length}\n` +
+          `**Author:** ${result.playlist.author?.name || "Unknown"}\n` +
+          `**First 5 tracks:**\n${result.tracks.slice(0, 5).map(t => `[${t.title}](${t.url})`).join("\n")}\n\n` +
+          `*Requested by ${interaction.user.username}*`,
+          interaction.client
+        );
+        if (result.playlist.thumbnail || result.tracks[0]?.thumbnail) {
+          embed.setThumbnail(result.playlist.thumbnail || result.tracks[0]?.thumbnail || null);
+        }
       } else {
         const track = result.tracks[0];
-        embed
-          .setTitle("Track added to queue")
-          .setDescription(`[${track.title}](${track.url})`)
-          .addFields(
-            { name: "Duration", value: track.duration, inline: true },
-            { name: "Author", value: track.author, inline: true }
-          )
-          .setThumbnail(track.thumbnail || null);
+        embed = ResponseBuilder.music(
+          "Track added to queue",
+          `[${track.title}](${track.url})\n\n` +
+          `**Duration:** ${track.duration}\n` +
+          `**Author:** ${track.author}\n\n` +
+          `*Requested by ${interaction.user.username}*`,
+          interaction.client
+        );
+        if (track.thumbnail) {
+          embed.setThumbnail(track.thumbnail);
+        }
       }
 
       // log the used extractor
@@ -125,7 +125,7 @@ export const play: Command = {
       console.error(`[Music] Error playing song:`, error);
       await interaction.reply({
         content: "An error occurred while trying to play the song.",
-        flags: 64,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },

@@ -9,7 +9,8 @@ import {
   TextInputStyle,
   ActionRowBuilder,
   ModalSubmitInteraction,
-  ChatInputCommandInteraction
+  ChatInputCommandInteraction,
+  MessageFlags
 } from "discord.js";
 import { ensureInGuild } from "../../../../utils/utils";
 
@@ -55,7 +56,7 @@ export async function useNicknameChange( interaction: ChatInputCommandInteractio
 
     await submitted.reply({
       content: `✅ Nickname changed to **${newNickname}** for 1 hour.`,
-      flags: 64
+      flags: MessageFlags.Ephemeral
     });
 
     setTimeout(async () => {
@@ -70,7 +71,7 @@ export async function useNicknameChange( interaction: ChatInputCommandInteractio
     try {
       await interaction.followUp({
         content: "❌ You didn't respond in time or an error occurred.",
-        flags: 64
+        flags: MessageFlags.Ephemeral
       });
     } catch (_) {
       // interaction already replied or deferred

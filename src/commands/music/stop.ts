@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { getPlayer } from "../../music/player";
 import { ensureBotInSameVoice, ensureInVoice } from "../../utils/voiceUtils";
 import { ensureInGuild } from "../../utils/utils";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Stop command for Discord bot.
@@ -40,18 +41,28 @@ export const stop: Command = {
 
     // check if there is a queue
     if (!queue) {
+      const embed = ResponseBuilder.music(
+        "No Music Playing",
+        "🔇 There is no music playing in this server.\n\nUse `/play` to start playing music!",
+        interaction.client
+      );
       await interaction.reply({
-        content: "There is no music playing in this server.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
     // check if the player is playing
     if (!queue.node.isPlaying()) {
+      const embed = ResponseBuilder.music(
+        "Nothing Playing",
+        "⏸️ There is no music currently playing.\n\nThe player is already stopped.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "There is no music currently playing.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -59,15 +70,25 @@ export const stop: Command = {
     // stop the player and clear the queue
     try {
       queue.node.stop();
+      const embed = ResponseBuilder.music(
+        "Music Stopped",
+        "⏹️ **Stopped the music, cleared the queue and left the voice channel.**\n\nUse `/play` to start playing music again!",
+        interaction.client
+      );
       await interaction.reply({
-        content: "✅ Stopped the music, cleared the queue and left the voice channel.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error("Error stopping music:", error);
+      const embed = ResponseBuilder.error(
+        "Stop Failed",
+        "❌ An error occurred while trying to stop the music. Please try again.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "An error occurred while trying to stop the music.",
-        flags: 64,
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
       });
     }
   }

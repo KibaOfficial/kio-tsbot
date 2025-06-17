@@ -3,10 +3,11 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { GuildTextBasedChannel, SlashCommandBuilder } from "discord.js";
+import { GuildTextBasedChannel, MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { ensureInGuild } from "../../utils/utils";
 import { addReactionRole, createPanel, deletePanel, listPanels, removeReactionRole } from "../../services/panelService";
+import { ResponseBuilder } from "../../utils/responses";
 
 export const panel: Command = {
   category: "reactionroles",
@@ -104,13 +105,13 @@ export const panel: Command = {
         const name = interaction.options.getString("name", true);
         const description = interaction.options.getString("description", true);
         const channel = interaction.options.getChannel("channel", true);
-        await interaction.deferReply({ flags: 64 }); // Ephemeral reply
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral }); // Ephemeral reply
         // Create the panel
         await createPanel(interaction, name, description, channel as GuildTextBasedChannel);
         // no need to send a reply here, as createPanel already does that
         break;
       case "add":
-        await interaction.deferReply({ flags: 64 }); // Ephemeral reply
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral }); // Ephemeral reply
         panelId = interaction.options.getString("panel_id", true);
         const roleName = interaction.options.getString("name", true);
         const roleDescription = interaction.options.getString("description", true);
@@ -118,7 +119,12 @@ export const panel: Command = {
         let emoji = interaction.options.getString("emoji", true); // Use raw emoji
         // Validate emoji
         if (!emoji) {
-          await interaction.editReply({ content: "Invalid emoji provided." });
+          const embed = ResponseBuilder.error(
+            "Invalid Emoji",
+            "❌ Invalid emoji provided. Please provide a valid emoji.",
+            interaction.client
+          );
+          await interaction.editReply({ embeds: [embed] });
           return;
         }
         // Emoji validation: Unicode or custom
@@ -133,7 +139,12 @@ export const panel: Command = {
           // Unicode emoji regex (basic):
           const unicodeEmojiRegex = /^(\u0000-\u007F|\p{Emoji}|\p{Extended_Pictographic})+$/u;
           if (!unicodeEmojiRegex.test(emoji)) {
-            await interaction.editReply({ content: "Invalid emoji format. Please provide a valid Unicode or custom emoji." });
+            const embed = ResponseBuilder.error(
+              "Invalid Emoji Format",
+              "❌ Invalid emoji format. Please provide a valid Unicode or custom emoji.",
+              interaction.client
+            );
+            await interaction.editReply({ embeds: [embed] });
             return;
           }
         }
@@ -142,14 +153,19 @@ export const panel: Command = {
         await addReactionRole(interaction, panelId, roleName, roleDescription, emoji, role.id, type);
         break;
       case "delete":
-        await interaction.deferReply({ flags: 64 }); // Ephemeral reply
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral }); // Ephemeral reply
         const choice = interaction.options.getString("choice", true);
         panelId = interaction.options.getString("panel_id", true);
         // Declare 'emoji' only in this block
         let emojiDel = interaction.options.getString("emoji", false); // Optional emoji for role deletion
         // Check if deleting a role or the entire panel
         if (choice === "role" && !emojiDel) {
-          await interaction.editReply({ content: "You must provide an emoji to delete a specific role." });
+          const embed = ResponseBuilder.error(
+            "Missing Emoji",
+            "❌ You must provide an emoji to delete a specific role.",
+            interaction.client
+          );
+          await interaction.editReply({ embeds: [embed] });
           return;
         }
 
@@ -170,12 +186,16 @@ export const panel: Command = {
         }
         break;
       case "list":
-        await interaction.deferReply({ flags: 64 }); // Ephemeral reply
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral }); // Ephemeral reply
         // List all panels
         await listPanels(interaction);
-        break;
-      default:
-        await interaction.reply({ content: "Unknown subcommand.", flags: 64 });
+        break;      default:
+        const embed = ResponseBuilder.error(
+          "Unknown Subcommand",
+          "❌ Unknown subcommand. Please use one of the available subcommands.",
+          interaction.client
+        );
+        await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         return;
     }
   }

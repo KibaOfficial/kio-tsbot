@@ -3,10 +3,11 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { AppDataSource } from "../../utils/data/db";
 import { User } from "../../utils/data/entity/User";
+import { ResponseBuilder } from "../../utils/responses";
 
 
 /**
@@ -39,30 +40,52 @@ export const inventory: Command = {
         undefined // multiplierExpiresAt
       );
       await userRepository.save(user);
+      
+      const embed = ResponseBuilder.economy(
+        "Welcome to the Economy!",
+        "You have been registered in the economy system. Your inventory is empty.\n\nUse `/shop` to buy items!",
+        interaction.client
+      );
+      
       await interaction.reply({
-        content: "You have been registered in the economy system. Your inventory is empty.",
-        flags: 64, // Ephemeral
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral, // Ephemeral
       });
       return;
     }
     
     // Check if the user has an inventory and if it's not empty
     if (!user.inventory || !Array.isArray(user.inventory) || user.inventory.length === 0) {
+      const embed = ResponseBuilder.economy(
+        "Inventory Empty",
+        "Your inventory is empty.\n\nUse `/shop` to buy items!",
+        interaction.client
+      );
+      
       await interaction.reply({
-        content: "Your inventory is empty.",
-        flags: 64, // Ephemeral
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral, // Ephemeral
       });
       return;
     }
     // Create a list of items in the inventory
     const inventoryItems = user.inventory.map((item) => {
-      return `**${item.emoji ? item.emoji + " " : ""}${item.name}** - ${item.desc}`;
+      return `${item.emoji ? item.emoji + " " : ""}**${item.name}** - ${item.desc}`;
     }).join("\n");
-    const embed = new EmbedBuilder()
-      .setColor("#0099ff")
-      .setTitle("Your Inventory")
-      .setDescription(inventoryItems)
-      .setFooter({ text: "Use /shop to buy more items." });
-    await interaction.reply({ embeds: [embed], flags: 64 }); // Ephemeral
+    
+    const embed = ResponseBuilder.economy(
+      "Your Inventory",
+      inventoryItems,
+      interaction.client
+    );
+    embed.setFooter({ 
+      text: "Use /shop to buy more items • Kio Economy System",
+      iconURL: interaction.client.user?.displayAvatarURL()
+    });
+    
+    await interaction.reply({ 
+      embeds: [embed], 
+      flags: MessageFlags.Ephemeral 
+    });
   }
 }

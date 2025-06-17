@@ -3,8 +3,9 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Invite command for Discord bot.
@@ -23,15 +24,30 @@ export const invite: Command = {
     const clientId = process.env.BOT_ID;
     if (!clientId) {
       console.log("[Invite] Bot ID is not set in the environment variables.");
-      await interaction.reply("[Invite] Bot ID is not set in the environment variables.");
+      const embed = ResponseBuilder.error(
+        "Configuration Error",
+        "Bot ID is not set in the environment variables. Please contact the bot administrator.",
+        interaction.client
+      );
+      await interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral
+      });
       return;
     }
 
     const permissions = 8; // Administrator-Permissions
     const inviteUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&integration_type=0&scope=bot`;
+    
+    const embed = ResponseBuilder.info(
+      "Invite Kio-TsBot",
+      `Click the link below to invite me to your server!\n\n🔗 **[Invite Link](${inviteUrl})**\n\n⚠️ **Note:** This invite grants administrator permissions for full functionality.`,
+      interaction.client
+    );
+    
     await interaction.reply({
-      content: `You can invite me using this link: [Invite Link](${inviteUrl})`,
-      flags: 64, // Ephemeral
+      embeds: [embed],
+      flags: MessageFlags.Ephemeral, // Ephemeral
     });
     console.log(`[Invite] Invite link sent: ${inviteUrl}\nRequested by: ${interaction.user.tag} (${interaction.user.id})`);
   }

@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { Guild } from "../../utils/data/entity/Guild";
 import { AppDataSource } from "../../utils/data/db";
@@ -65,7 +65,7 @@ export const welcome: Command = {
       return;
     }
 
-    await interaction.deferReply({ flags: 64 });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     switch (type) {
       case "welcome":

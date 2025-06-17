@@ -8,6 +8,7 @@ import { EmbedBuilder } from "discord.js";
 import { BotEvent } from "../interfaces/types";
 import { AppDataSource } from "../utils/data/db";
 import { Guild } from "../utils/data/entity/Guild";
+import { ResponseBuilder } from "../utils/responses";
 
 const event: BotEvent<"guildMemberRemove"> = {
   name: "guildMemberRemove",
@@ -18,17 +19,15 @@ const event: BotEvent<"guildMemberRemove"> = {
     if (!dbGuild || !dbGuild.leaveChannelId) return;
     const channel = member.guild.channels.cache.get(dbGuild.leaveChannelId);
     if (!channel || !channel.isTextBased()) return;
-    await channel.send({
-      embeds: [
-        new EmbedBuilder()
-          .setTitle(`👋 Member ${member.user.username} has left the server!`)
-          .setDescription(`We hope you had a great time with us.\n\nUser: <@${member.user.id}>`)
-          .setColor(0xED4245)
-          .setThumbnail(member.user.displayAvatarURL())
-          .setTimestamp()
-          .setFooter({ text: `User ID: ${member.user.id}` })
-      ]
-    });
+    const embed = ResponseBuilder.welcome(
+      `👋 Member ${member.user.username} has left the server!`,
+      `We hope you had a great time with us.\n\nUser: <@${member.user.id}>\n\nUser ID: ${member.user.id}`,
+      member.client
+    ).setColor(0xED4245);
+    if (member.user.displayAvatarURL()) {
+      embed.setThumbnail(member.user.displayAvatarURL());
+    }
+    await channel.send({ embeds: [embed] });
   }
 }
 export default event;

@@ -3,10 +3,11 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder, CommandInteraction } from "discord.js";
+import { SlashCommandBuilder, CommandInteraction, MessageFlags } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { AppDataSource } from "../../utils/data/db";
 import { Ship } from "../../utils/data/entity/Ship";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Command to show the user's shipping statistics.
@@ -37,7 +38,7 @@ export const mystats: Command = {
     if (!ship || !ship.pairsCount) {
       await interaction.reply({
         content: "No shipping data found.",
-        flags: 64 // Ephemeral
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
     }
@@ -49,19 +50,27 @@ export const mystats: Command = {
         return acc + pairCount;
       }
       return acc;
-    }, 0);
-
-    if (count === 0) {
+    }, 0);    if (count === 0) {
+      const embed = ResponseBuilder.shippening(
+        "No Ships Yet",
+        "You have not been shipped in this server yet.\n\nUse `/ship` to start shipping members!",
+        interaction.client
+      );
       await interaction.reply({
-        content: "You have not been shipped in this server yet.",
-        flags: 64 // Ephemeral
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
-    }
-
-    // Reply with the shipping statistics
+    }    // Reply with the shipping statistics
+    const embed = ResponseBuilder.shippening(
+      "Your Shipping Statistics",
+      `You have been shipped **${count}** times in this server! 💕\n\nKeep spreading the love with \`/ship\`!`,
+      interaction.client
+    );
+    
     await interaction.reply({
-      content: `**Your Shipping Statistics:**\n\nYou have been shipped **${count}** times in this server.`,
+      embeds: [embed],
+      flags: MessageFlags.Ephemeral
     });
   }
 }

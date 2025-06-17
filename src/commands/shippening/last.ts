@@ -3,11 +3,12 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { ensureInGuild } from "../../utils/utils";
 import { AppDataSource } from "../../utils/data/db";
 import { Ship } from "../../utils/data/entity/Ship";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Command to show the last shipped pair in the guild.
@@ -37,7 +38,7 @@ export const last: Command = {
     if (!ship || !ship.lastPair) {
       await interaction.reply({
         content: "No pairs have been shipped yet.",
-        flags: 64 // Ephemeral
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
     }
@@ -46,19 +47,28 @@ export const last: Command = {
     const [m1, m2] = ship.lastPair;
     // Fetch the members from the guild
     const member1 = await interaction.guild!.members.fetch(m1).catch(() => null);
-    const member2 = await interaction.guild!.members.fetch(m2).catch(() => null);
-
-    if (!member1 || !member2) {
+    const member2 = await interaction.guild!.members.fetch(m2).catch(() => null);    if (!member1 || !member2) {
+      const embed = ResponseBuilder.warning(
+        "Members Not Found",
+        "One of the members in the last pair is no longer in the server.",
+        interaction.client
+      );
       await interaction.reply({
-        content: "One of the members in the last pair is no longer in the server.",
-        flags: 64 // Ephemeral
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
     }
 
     // Reply with the last shipped pair
-    await interaction.reply(
-      `**Last Shipped Pair:**\n\n<@${member1.id}> ❤️ <@${member2.id}>\n\n`
+    const embed = ResponseBuilder.shippening(
+      "Last Shipped Pair",
+      `<@${member1.id}> ❤️ <@${member2.id}>`,
+      interaction.client
     );
+    
+    await interaction.reply({
+      embeds: [embed]
+    });
   }
 }

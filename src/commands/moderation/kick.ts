@@ -6,9 +6,11 @@
 import {
   SlashCommandBuilder,
   PermissionsBitField,
+  MessageFlags,
 } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { ensurePermissions } from "../../utils/utils";
+import { ResponseBuilder } from "../../utils/responses";
 
 /**
  * Kick command for Discord bot.
@@ -43,7 +45,7 @@ export const kick: Command = {
     if (!interaction.guild) {
       await interaction.reply({
         content: "This command can only be used in a server.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
     }
@@ -52,7 +54,7 @@ export const kick: Command = {
     if (await ensurePermissions(interaction, ["KickMembers"])) {
       await interaction.reply({
         content: "You do not have permission to kick members.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
     }
@@ -62,7 +64,7 @@ export const kick: Command = {
     if (!botMember.permissions.has(PermissionsBitField.Flags.KickMembers)) {
       await interaction.reply({
         content: "I do not have permission to kick members.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
     }
@@ -74,7 +76,7 @@ export const kick: Command = {
     if (!user) {
       await interaction.reply({
         content: "You must specify a user to kick.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral // Ephemeral
       });
       return;
     }
@@ -89,40 +91,50 @@ export const kick: Command = {
     if (user.id === interaction.user.id) {
       await interaction.reply({
         content: "You cannot kick yourself.",
-        flags: 64, // Ephemeral
+        flags: MessageFlags.Ephemeral, // Ephemeral
       });
       return;
     }
 
     // Attempt to kick the user
     try {
-      const member = await interaction.guild.members.fetch(user.id);
-
-      // Prevent kicking higher/equal roles or the owner
+      const member = await interaction.guild.members.fetch(user.id);      // Prevent kicking higher/equal roles or the owner
       if (
         member.roles.highest.position >= botMember.roles.highest.position ||
         member.id === interaction.guild.ownerId
       ) {
+        const embed = ResponseBuilder.moderation(
+          "Cannot Kick User",
+          "I cannot kick this user due to role hierarchy or because they are the server owner.",
+          interaction.client
+        );
         await interaction.reply({
-          content:
-            "I cannot kick this user due to role hierarchy or because they are the server owner.",
-          flags: 64, // Ephemeral
+          embeds: [embed],
+          flags: MessageFlags.Ephemeral, // Ephemeral
         });
         return;
       }
 
       await member.kick(`${reason} (Kicked by ${interaction.user.tag})`);
+      
+      const embed = ResponseBuilder.moderation(
+        "User Kicked",
+        `Successfully kicked **${user.tag}**\n**Reason:** ${reason}`,
+        interaction.client
+      );
       await interaction.reply({
-        content: `✅ Successfully kicked **${user.tag}**. Reason: ${reason}`,
-        flags: 64, // Ephemeral
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral, // Ephemeral
       });
-    } catch (error) {
+    } catch (error) {      const embed = ResponseBuilder.error(
+        "Kick Failed",
+        `Unable to kick **${user.tag}**\n**Error:** ${error instanceof Error ? error.message : "Unknown error"}`,
+        interaction.client
+      );
       await interaction.reply({
-        content: `❌ Unable to kick **${user.tag}**. Error: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
-        flags: 64, // Ephemeral
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral, // Ephemeral
       });
     }
-  },
-};
+  }
+}

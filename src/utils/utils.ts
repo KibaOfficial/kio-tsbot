@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { ChatInputCommandInteraction, User as DiscordUser } from "discord.js";
+import { ChatInputCommandInteraction, User as DiscordUser, MessageFlags } from "discord.js";
 import { Command, PermissionFlag } from "../interfaces/types";
 import { AppDataSource } from "./data/db";
 import { User } from "./data/entity/User";
@@ -21,7 +21,7 @@ export async function ensureInGuild(interaction: ChatInputCommandInteraction) {
   if (!interaction.guild) {
     // check if interaction message got already defered
     if (!interaction.deferred && !interaction.replied) {
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     }
 
     await interaction.editReply({
@@ -59,7 +59,7 @@ export async function ensurePermissions(
   if (!memberPerms || !perms.every(perm => memberPerms.has(perm))) {
     // check if interaction message got already defered
     if (!interaction.deferred && !interaction.replied) {
-      await interaction.deferReply({ ephemeral: true });
+      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     }
     await interaction.editReply({
       content: `You do not have the required permissions: ${perms.map(perm => perm.toString()).join(", ")}`,

@@ -3,10 +3,11 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { Command } from "../../interfaces/types";
 import { AppDataSource } from "../../utils/data/db";
 import { User } from "../../utils/data/entity/User";
+import { ResponseBuilder } from "../../utils/responses";
 
 
 /**
@@ -29,9 +30,7 @@ export const balance: Command = {
     const userRepo = AppDataSource.getRepository(User);
     let user = await userRepo.findOne({
       where: { id: interaction.user.id },
-    });
-
-    if (!user) {
+    });    if (!user) {
       // If user does not exist, create a new user with default
       user = new User(
         interaction.user.id,
@@ -41,17 +40,29 @@ export const balance: Command = {
         undefined, // multiplierExpiresAt
       );
       await userRepo.save(user);
+      
+      const embed = ResponseBuilder.economy(
+        "Welcome to the Economy!",
+        `Your balance is: **${Number(user.balance) || 0}** fops 🦊\n\nWelcome to the economy system! Start earning by using \`/daily\` or playing games.`,
+        interaction.client
+      );
+      
       await interaction.reply({
-        content: `Your balance is: **${user.balance}** fops 🦊\n\nWelcome to the economy system!`,
-        flags: 64, // Ephemeral
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral, // Ephemeral
       });
       return;
     }
 
+    const embed = ResponseBuilder.economy(
+      "Your Balance",
+      `You have **${Number(user.balance) || 0}** fops 🦊`,
+      interaction.client
+    );
+
     await interaction.reply({
-      content:
-        `Your balance is: **${user.balance}** fops 🦊\n\n`,
-        flags: 64, // Ephemeral
+      embeds: [embed],
+      flags: MessageFlags.Ephemeral, // Ephemeral
     });
   },
 };

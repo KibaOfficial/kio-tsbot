@@ -3,7 +3,7 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-import { GuildMember, VoiceChannel, ChannelType, ChatInputCommandInteraction } from "discord.js";
+import { GuildMember, VoiceChannel, ChannelType, ChatInputCommandInteraction, MessageFlags } from "discord.js";
 
 
 // Utility functions for voice channel management
@@ -21,7 +21,7 @@ export async function ensureInVoice(interaction: ChatInputCommandInteraction): P
   if (!member) {
     await interaction.reply({
       content: "You need to be a member of this server to use this command.",
-      flags: 64 // Ephemeral
+      flags: MessageFlags.Ephemeral // Ephemeral
     });
     return false;
   }
@@ -29,7 +29,7 @@ export async function ensureInVoice(interaction: ChatInputCommandInteraction): P
   if (!voiceChannel || voiceChannel.type !== ChannelType.GuildVoice) {
     await interaction.reply({
       content: "You need to be in a **voice channel** (not a stage channel) to use this command.",
-      flags: 64 // Ephemeral
+      flags: MessageFlags.Ephemeral // Ephemeral
     });
     return false;
   }
@@ -50,7 +50,7 @@ export async function ensureBotInSameVoice(interaction: ChatInputCommandInteract
   if (botVoiceChannel && botVoiceChannel.id !== userVoiceChannel.id) {
     await interaction.reply({
       content: `I am already in a different voice channel (${botVoiceChannel.name}). Please move me to your voice channel.`,
-      flags: 64 // Ephemeral
+      flags: MessageFlags.Ephemeral // Ephemeral
     });
     return false;
   }
